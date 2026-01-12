@@ -31,7 +31,7 @@ const app = express()
 const port = process.env.PORT
 
 // 👇 ADD THIS
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 
 /* -------------------- DATABASE -------------------- */
@@ -45,7 +45,7 @@ app.use(express.json())
 // app.use(bodyParser.json())
 // app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cors({
-    origin: ['http://localhost:5173', 'http://localhost:5174'],
+    origin: ['http://localhost:5173', 'http://localhost:5174', 'https://ba-dastoor-gilt.vercel.app'],
     credentials: true
 }));
 
@@ -90,9 +90,11 @@ app.use((req, res) => {
 });
 
 
-app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
-})
+// app.listen(port, () => {
+//     console.log(`Example app listening on port ${port}`)
+// })
 
 // Username:alitaha1447_db_user
 // Password:Kxg741To56MqcLym
+
+module.exports = app;
