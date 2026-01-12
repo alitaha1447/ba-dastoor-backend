@@ -1,13 +1,13 @@
 const multer = require("multer");
 const path = require("path");
-const fs = require("fs");
+// const fs = require("fs");
 // const fsPromises = require("fs/promises");
 
 
 // ensure uploads folder exists
-if (!fs.existsSync("uploads")) {
-    fs.mkdirSync("uploads");
-}
+// if (!fs.existsSync("uploads")) {
+//     fs.mkdirSync("uploads");
+// }
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {

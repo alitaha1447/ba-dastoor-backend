@@ -1,20 +1,17 @@
 const cloudinary = require('../../config/cloudinary.js')
 const uploadToCloudinary = require("../../utils/cloudinaryUpload.js")
 const DesktopBanner = require('../desktopBanner/desktopModel.js');
-// const fs = require("fs");
 const fsPromises = require("fs/promises");
 
 
 module.exports = {
     uploadDesktopBanner: async (req, res) => {
-        let tempFilePath = null;
+        const desktopFile = req.files?.desktop?.[0];
+        let tempFilePath = desktopFile?.path;
+
         try {
-            console.log("FILES:", req.files);
-            console.log("BODY:", req.body);
-            console.log("QUERY:", req.query);
 
             const { page } = req.query;
-            const desktopFile = req.files?.desktop?.[0];
 
             if (!desktopFile) {
                 return res.status(400).json({
@@ -28,10 +25,6 @@ module.exports = {
                 "banners/desktop",
                 req.body.desktopMediaType || "auto"
             );
-
-            // fs.unlinkSync(desktopFile.path);
-
-            // console.log("CLOUDINARY RESULT:", desktopUpload);
 
             const bannerData = {
                 page,

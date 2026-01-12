@@ -10,8 +10,12 @@ const mobileBannerSchema = new mongoose.Schema(
             url: String,
             publicId: String,
             mediaType: String,
-        }
-
+        },
+        // ✅ Controls visibility on frontend
+        isSelected: {
+            type: Boolean,
+            default: false,
+        },
     },
     { timestamps: true }
 );

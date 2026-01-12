@@ -12,17 +12,20 @@ module.exports = {
         let uploadedFilePath = null;
         try {
             const { enquiryType } = req.body;
-            console.log(req.file.filename)
+            console.log('...................')
+            console.log(enquiryType)
+            console.log('...................')
+            // console.log(req.file.filename)
             if (!["contact", "catering", "franchise", "career"].includes(enquiryType)) {
                 return res.status(400).json({ message: "Invalid enquiry type" });
             }
-            console.log("REQ.FILE 👉", req.file);
+            // console.log("REQ.FILE 👉", req.file);
             // 🔒 Resume mandatory for career
-            if (enquiryType === "career" && !req.file) {
-                return res.status(400).json({
-                    message: "Resume (CV) is required for career enquiry",
-                });
-            }
+            // if (enquiryType === "career" && !req.file) {
+            //     return res.status(400).json({
+            //         message: "Resume (CV) is required for career enquiry",
+            //     });
+            // }
             const data = { ...req.body };
             // Resume only for career
             // if (enquiryType === "career" && req.file) {
@@ -161,11 +164,9 @@ module.exports = {
                 <p><b>Name:</b> ${data.name || "-"}</p>
                 <p><b>Email:</b> ${data.email || "-"}</p>
                 <p><b>Phone:</b> ${data.phone || "-"}</p>
-                ${data.resume?.url
-                        ? `<p><b>Resume:</b> <a href="${data.resume.url}" target="_blank">Download CV</a></p>`
-                        : ""
-                    }
-            `,
+               
+            `
+                ,
             };
             // 🚀 Send both emails in parallel
             await Promise.all([

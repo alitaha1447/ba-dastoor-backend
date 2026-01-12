@@ -1,20 +1,17 @@
 const cloudinary = require('../../config/cloudinary')
 const uploadToCloudinary = require('../../utils/cloudinaryUpload')
 const MobileBanner = require('../mobileBanner/mobileModel')
-// const fs = require("fs");
 const fsPromises = require("fs/promises");
 
 
 module.exports = {
     uploadMobileBanner: async (req, res) => {
-        let tempFilePath = null;
+
+        const mobileFile = req.files?.mobile?.[0];
+        let tempFilePath = mobileFile?.path;
         try {
-            // console.log("FILES:", req.files);
-            // console.log("BODY:", req.body);
-            // console.log("QUERY:", req.query);
 
             const { page } = req.query;
-            const mobileFile = req.files?.mobile?.[0];
 
             if (!mobileFile) {
                 return res.status(400).json({
@@ -23,17 +20,12 @@ module.exports = {
                 });
             }
 
-            tempFilePath = mobileFile.path; // ✅ track temp file
-
             const mobileUpload = await uploadToCloudinary(
                 mobileFile.path,
                 "banners/mobile",
                 req.body.mobileMediaType || "auto"
             );
 
-            // fs.unlinkSync(mobileFile.path);
-
-            // console.log("CLOUDINARY RESULT:", mobileUpload);
 
             const bannerData = {
                 page,
@@ -63,10 +55,22 @@ module.exports = {
             });
         } finally {
             // 🧹 ALWAYS remove temp file
+            // if (tempFilePath) {
+            //     try {
+            //         await fsPromises.unlink(tempFilePath);
+            //         console.log("🧹 Mobile banner temp deleted:", tempFilePath);
+            //     } catch (err) {
+            //         console.error("❌ Failed to delete temp file:", err.message);
+            //     }
+            // }
             if (tempFilePath) {
                 try {
+                    // ⏳ allow Cloudinary to release file lock (important on Windows)
+                    await new Promise(resolve => setTimeout(resolve, 150));
+
                     await fsPromises.unlink(tempFilePath);
-                    console.log("🧹 Mobile banner temp deleted:", tempFilePath);
+                    console.log("🧹 Temp banner file deleted:", tempFilePath);
+
                 } catch (err) {
                     console.error("❌ Failed to delete temp file:", err.message);
                 }
@@ -114,5 +118,31 @@ module.exports = {
             res.status(500).json({ message: "Failed to delete Mobile banner" });
 
         }
-    }
+    },
+    updateMobileBannerSelection: async (req, res) => {
+        const { ids, isSelected } = req.body;
+        if (!Array.isArray(ids) || ids.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "IDs array is required",
+            });
+        }
+        try {
+            await MobileBanner.updateMany(
+                { _id: { $in: ids } },
+                { $set: { isSelected } }
+            );
+            res.status(200).json({
+                success: true,
+                message: "Selection updated successfully",
+            })
+        } catch (error) {
+            console.error("PATCH ERROR:", error);
+            res.status(500).json({
+                success: false,
+                message: "Failed to update selection",
+            });
+        }
+    },
+    getSelectedMobileBanners: async (req, res) => { },
 }

@@ -68,5 +68,83 @@ module.exports = {
                 message: error.message,
             });
         }
-    }
+    },
+    updateTeam: async (req, res) => {
+        let newPublicId = null;
+        let oldPublicId = null;
+
+        try {
+            const { teamName, description, role } = req.body;
+
+            const existing = await Team.findOne();
+            if (!existing) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Team not found",
+                });
+            }
+
+            const updatePayload = {
+                ...(teamName !== undefined && { teamName }),
+                ...(description !== undefined && { description }),
+                ...(role !== undefined && { role }),
+            };
+
+            if (req.file) {
+                console.log("📂 Temp file created:", req.file.path);
+
+                oldPublicId = existing.teamImage?.publicId || null;
+                const uploadResult = await cloudinary.uploader.upload(req.file.path, {
+                    folder: "about-us",
+                    quality: "auto:eco",
+                    fetch_format: "auto",
+                });
+
+
+                newPublicId = uploadResult.public_id;
+
+                updatePayload.teamImage = {
+                    url: uploadResult.secure_url,
+                    publicId: uploadResult.public_id,
+                };
+                console.log("☁️ Uploaded new image:", newPublicId);
+            }
+            const updated = await Team.findOneAndUpdate(
+                {},
+                { $set: updatePayload },
+                { new: true }
+            );
+            if (oldPublicId) {
+                await cloudinary.uploader.destroy(oldPublicId);
+            }
+
+            return res.status(200).json({
+                success: true,
+                message: "Team updated successfully",
+                data: updated,
+            });
+        } catch (error) {
+            console.error("❌ Update failed:", error.message);
+
+            /* ROLLBACK NEW CLOUDINARY IMAGE */
+            if (newPublicId) {
+                await cloudinary.uploader.destroy(newPublicId);
+                console.log("↩️ Rolled back new Cloudinary image:", newPublicId);
+            }
+
+            return res.status(500).json({
+                success: false,
+                message: error.message,
+            });
+        } finally {
+            if (req.file?.path) {
+                try {
+                    await fsPromises.unlink(req.file.path);
+                    console.log("🧹 Temp file deleted:", req.file.path);
+                } catch (err) {
+                    console.error("❌ Temp file delete failed:", err.message);
+                }
+            }
+        }
+    },
 }
