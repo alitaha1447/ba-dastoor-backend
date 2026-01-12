@@ -75,7 +75,7 @@ app.use("/api/team", teamRoutes)
 //     "/uploads",
 //     express.static(path.join(process.cwd(), "src/uploads"))
 // );
-// app.use("/uploads/resumes", express.static("src/uploads/resumes"));
+app.use("/uploads/resumes", express.static("src/uploads/resumes"));
 
 
 // Error handling middleware
@@ -90,9 +90,9 @@ app.use((req, res) => {
 });
 
 
-// app.listen(port, () => {
-//     console.log(`Example app listening on port ${port}`)
-// })
+app.listen(port, () => {
+    console.log(`Example app listening on port ${port}`)
+})
 
 // Username:alitaha1447_db_user
 // Password:Kxg741To56MqcLym
@@ -101,4 +101,4 @@ app.get("/api/test", (req, res) => {
 });
 
 
-module.exports = app
+// module.exports = app
