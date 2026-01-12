@@ -96,5 +96,9 @@ app.use((req, res) => {
 
 // Username:alitaha1447_db_user
 // Password:Kxg741To56MqcLym
+app.get("/api/test", (req, res) => {
+    res.json({ ok: true });
+});
+
 
 module.exports = app
