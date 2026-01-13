@@ -34,8 +34,23 @@ connectDB();
 
 app.use(express.json())
 app.use(cors({
-    origin: ['http://localhost:5173', 'http://localhost:5174', 'https://ba-dastoor-bx9hbi0uc-tahas-projects-9b4531da.vercel.app']
+    origin: (origin, callback) => {
+        if (
+            !origin ||
+            origin.startsWith("http://localhost") ||
+            origin.endsWith(".vercel.app")
+        ) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
 }));
+
+app.options("*", cors());
+
 
 /* -------------------- ROUTES -------------------- */
 
