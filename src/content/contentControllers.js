@@ -112,11 +112,13 @@ module.exports = {
         }
         finally {
             /* 🔥 CLEAN ALL MULTER FILES (MEDIA + LOGO) */
+            console.log('finaly block log')
             if (req.files) {
+                console.log('req.files', req.files)
                 const allFiles = Object.values(req.files).flat();
-
                 for (const file of allFiles) {
                     try {
+                        console.log('file --> ', file)
                         // Small delay fixes Windows file lock
                         await new Promise(resolve => setTimeout(resolve, 50));
                         await fsPromises.unlink(file.path);
