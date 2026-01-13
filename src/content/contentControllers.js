@@ -39,7 +39,7 @@ module.exports = {
             let mediaData;
             if (req.files?.media?.length) {
                 const mediaFile = req.files.media[0];
-                tempFiles.push(mediaFile);
+                // tempFiles.push(mediaFile);
 
                 const mediaUpload = await uploadToCloudinary(
                     mediaFile.path,
@@ -75,7 +75,7 @@ module.exports = {
             let logoData;
             if (req.files?.logo?.length) {
                 const logoFile = req.files.logo[0];
-                tempFiles.push(logoFile);
+                // tempFiles.push(logoFile);
 
                 const logoUpload = await uploadToCloudinary(
                     logoFile.path,
