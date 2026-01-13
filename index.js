@@ -7,31 +7,31 @@ const path = require("path");
 
 
 
-const connectDB = require('../src/config/dbConfig.js')
+const connectDB = require('./src/config/dbConfig.js')
 // const bodyParser = require('body-parser')
 
-const jobRoutes = require('../src/jobs/jobRoutes.js')
-const bannerRoutes = require('../src/banners/bannerRoutes.js')
-const desktopBannerRoutes = require('../src/banners/desktopBanner/desktopRoutes.js')
-const mobileBannerRoutes = require('../src/banners/mobileBanner/mobileRoutes.js')
-const enquiryRoutes = require('../src/enquiry/enquiryRoutes.js')
-const branchRoutes = require('../src/branch/routes/branchRoutes.js')
-const contentRoutes = require('../src/menus/routes/contentRoutes.js')
-const categoryRoutes = require('../src/menus/routes/categoryRoutes.js')
-const dishRoutes = require('../src/menus/routes/dishRoutes.js')
-const socialRoutes = require('../src/socialMedia/routes/socialLinksRoutes.js')
-const galleryRoutes = require('../src/gallery/galleryRoutes.js')
-const newGalleryRoutes = require('../src/gallery/newGallery/galleryRoutes.js')
-const newGalleryVideoRoutes = require('../src/gallery/newGalleryVideos/galleryVideoRoutes.js')
-const aboutUsRoutes = require('../src/aboutUs/aboutRoute.js')
-const generalContentRoutes = require('../src/content/contentRoutes.js')
-const teamRoutes = require('../src/teams/teamRoutes.js')
+const jobRoutes = require('./src/jobs/jobRoutes.js')
+const bannerRoutes = require('./src/banners/bannerRoutes.js')
+const desktopBannerRoutes = require('./src/banners/desktopBanner/desktopRoutes.js')
+const mobileBannerRoutes = require('./src/banners/mobileBanner/mobileRoutes.js')
+const enquiryRoutes = require('./src/enquiry/enquiryRoutes.js')
+const branchRoutes = require('./src/branch/routes/branchRoutes.js')
+const contentRoutes = require('./src/menus/routes/contentRoutes.js')
+const categoryRoutes = require('./src/menus/routes/categoryRoutes.js')
+const dishRoutes = require('./src/menus/routes/dishRoutes.js')
+const socialRoutes = require('./src/socialMedia/routes/socialLinksRoutes.js')
+const galleryRoutes = require('./src/gallery/galleryRoutes.js')
+const newGalleryRoutes = require('./src/gallery/newGallery/galleryRoutes.js')
+const newGalleryVideoRoutes = require('./src/gallery/newGalleryVideos/galleryVideoRoutes.js')
+const aboutUsRoutes = require('./src/aboutUs/aboutRoute.js')
+const generalContentRoutes = require('./src/content/contentRoutes.js')
+const teamRoutes = require('./src/teams/teamRoutes.js')
 
 const app = express()
 const port = process.env.PORT
 
 // 👇 ADD THIS
-// app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 
 /* -------------------- DATABASE -------------------- */
@@ -75,7 +75,7 @@ app.use("/api/team", teamRoutes)
 //     "/uploads",
 //     express.static(path.join(process.cwd(), "src/uploads"))
 // );
-app.use("/uploads/resumes", express.static("src/uploads/resumes"));
+// app.use("/uploads/resumes", express.static("src/uploads/resumes"));
 
 
 // Error handling middleware
@@ -96,9 +96,5 @@ app.listen(port, () => {
 
 // Username:alitaha1447_db_user
 // Password:Kxg741To56MqcLym
-app.get("/api/test", (req, res) => {
-    res.json({ ok: true });
-});
-
 
 // module.exports = app
