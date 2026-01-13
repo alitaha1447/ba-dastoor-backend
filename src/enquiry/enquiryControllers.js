@@ -27,6 +27,8 @@ module.exports = {
             //     });
             // }
             const data = { ...req.body };
+            console.log('3')
+            console.log(data)
             // Resume only for career
             // if (enquiryType === "career" && req.file) {
             //     data.resume = {
@@ -125,8 +127,9 @@ module.exports = {
 
             }
             // Save to DB
+            console.log('4')
             const enquiry = await Enquiry.create(data);
-
+            console.log(enquiry)
             // 📧 Send Email to Admin
             // const mailOptions = {
             //     from: `"Website Enquiry" <${process.env.ADMIN_EMAIL}>`,
