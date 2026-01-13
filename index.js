@@ -34,7 +34,7 @@ connectDB();
 
 app.use(express.json())
 app.use(cors({
-    origin: ['http://localhost:5173', 'http://localhost:5174', 'https://ba-dastoor-gilt.vercel.app'],
+    origin: ['http://localhost:5173', 'http://localhost:5174', 'https://ba-dastoor-bx9hbi0uc-tahas-projects-9b4531da.vercel.app'],
     credentials: true
 }));
 
