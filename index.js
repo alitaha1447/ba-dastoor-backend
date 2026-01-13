@@ -69,6 +69,10 @@ app.use((req, res) => {
     res.status(404).json({ error: 'Route not found' });
 });
 
+app.get("/api/health", (req, res) => {
+    res.json({ status: "OK" });
+});
+
 
 app.listen(port, '0.0.0.0', () => {
     console.log(`Server running on port ${port}`);
