@@ -25,42 +25,43 @@ module.exports = {
                 });
             }
 
-            /* 🔒 ONE DOCUMENT PER PAGE VALIDATION */
-            const alreadyExists = await GeneralContent.findOne({ page });
-            if (alreadyExists) {
+            /* 🔒 ONE PAGE = ONE DOCUMENT */
+            const exists = await GeneralContent.findOne({ page });
+            if (exists) {
                 return res.status(409).json({
                     success: false,
                     message:
-                        "Content already exists for this page. You can either edit or delete it.",
+                        "Content already exists for this page. You can edit or delete it.",
                 });
             }
 
-            if (!req.files?.media?.length) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Media file is required",
-                });
+            /* ========= OPTIONAL MEDIA ========= */
+            let mediaData;
+            if (req.files?.media?.length) {
+                const mediaFile = req.files.media[0];
+                tempFiles.push(mediaFile);
+
+                const mediaUpload = await uploadToCloudinary(
+                    mediaFile.path,
+                    "content",
+                    mediaType || "auto"
+                );
+
+                mediaData = {
+                    url: mediaUpload.secure_url,
+                    publicId: mediaUpload.public_id,
+                    mediaType: mediaType || "auto",
+                };
             }
 
-            const mediaFile = req.files.media[0];
-            tempFiles.push(mediaFile);
+            /* ========= OPTIONAL LOGO ========= */
+            let logoData;
+            if (req.files?.logo?.length) {
+                const logoFile = req.files.logo[0];
+                tempFiles.push(logoFile);
 
-            if (req.files.logo?.length) {
-                tempFiles.push(req.files.logo[0]);
-            }
-
-            /* ========= MEDIA UPLOAD ========= */
-            const mediaUpload = await uploadToCloudinary(
-                mediaFile.path,
-                "content",
-                mediaType || "auto"
-            );
-
-            /* ========= LOGO UPLOAD ========= */
-            let logoData = {};
-            if (req.files.logo?.length) {
                 const logoUpload = await uploadToCloudinary(
-                    req.files.logo[0].path,
+                    logoFile.path,
                     "content",
                     "image"
                 );
@@ -76,32 +77,27 @@ module.exports = {
                 page,
                 heading,
                 description,
-                mediaType,
-                logo: logoData,
-                media: {
-                    url: mediaUpload.secure_url,
-                    publicId: mediaUpload.public_id,
-                    mediaType,
-                },
+                ...(mediaData && { media: mediaData }),
+                ...(logoData && { logo: logoData }),
             });
 
-            res.status(201).json({
+            return res.status(201).json({
                 success: true,
                 message: "Content created successfully",
                 data: content,
             });
+
         } catch (error) {
-            res.status(500).json({
+            return res.status(500).json({
                 success: false,
                 message: error.message,
             });
         } finally {
-            /* 🔥 TEMP FILE CLEANUP */
+            /* 🔥 CLEAN TEMP FILES */
             for (const file of tempFiles) {
                 try {
                     await fsPromises.unlink(file.path);
-                    console.log(`🗑️ Temp file removed: ${file.path}`);
-                } catch (err) {
+                } catch {
                     console.error(`❌ Failed to remove temp file: ${file.path}`);
                 }
             }
@@ -178,4 +174,105 @@ module.exports = {
             });
         }
     },
+    updateContentByPage: async (req, res) => {
+        const tempFiles = [];
+
+        try {
+            const { page } = req.query;
+            const { heading, description, mediaType } = req.body;
+
+            if (!page) {
+                return res.status(400).json({
+                    success: false,
+                    message: "page is required",
+                });
+            }
+
+            const content = await GeneralContent.findOne({ page });
+            if (!content) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Content not found for this page",
+                });
+            }
+
+            /* ========= UPDATE TEXT ========= */
+            if (heading) content.heading = heading;
+            if (description) content.description = description;
+
+            /* ========= UPDATE MEDIA ========= */
+            if (req.files?.media?.length) {
+                const mediaFile = req.files.media[0];
+                tempFiles.push(mediaFile);
+
+                // delete old media
+                if (content.media?.publicId) {
+                    await cloudinary.uploader.destroy(
+                        content.media.publicId,
+                        content.media.mediaType === "video"
+                            ? { resource_type: "video" }
+                            : {}
+                    );
+                }
+
+                const mediaUpload = await uploadToCloudinary(
+                    mediaFile.path,
+                    "content",
+                    mediaType || content.media?.mediaType || "auto"
+                );
+
+                content.media = {
+                    url: mediaUpload.secure_url,
+                    publicId: mediaUpload.public_id,
+                    mediaType: mediaType || content.media?.mediaType || "auto",
+                };
+            }
+
+            /* ========= UPDATE LOGO ========= */
+            if (req.files?.logo?.length) {
+                const logoFile = req.files.logo[0];
+                tempFiles.push(logoFile);
+
+                if (content.logo?.publicId) {
+                    await cloudinary.uploader.destroy(content.logo.publicId);
+                }
+
+                const logoUpload = await uploadToCloudinary(
+                    logoFile.path,
+                    "content",
+                    "image"
+                );
+
+                content.logo = {
+                    url: logoUpload.secure_url,
+                    publicId: logoUpload.public_id,
+                };
+            }
+
+            await content.save();
+
+            // 🔥 THIS RESPONSE WAS MISSING
+            return res.status(200).json({
+                success: true,
+                message: "Content updated successfully",
+                data: content,
+            });
+
+        } catch (error) {
+            return res.status(500).json({
+                success: false,
+                message: error.message,
+            });
+        } finally {
+            /* 🔥 TEMP FILE CLEANUP */
+            for (const file of tempFiles) {
+                try {
+                    await fsPromises.unlink(file.path);
+                } catch {
+                    console.error("Failed to remove temp file:", file.path);
+                }
+            }
+        }
+    }
+
 };

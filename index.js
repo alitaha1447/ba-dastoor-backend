@@ -40,14 +40,17 @@ app.use(cors({
             origin.startsWith("http://localhost") ||
             origin.endsWith(".vercel.app")
         ) {
-            callback(null, true);
-        } else {
-            callback(new Error("Not allowed by CORS"));
+            return callback(null, true);
         }
+        return callback(new Error("Not allowed by CORS"));
     },
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"]
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
 }));
+
+// 🔥 REQUIRED FOR PUT + FormData
+// app.options("/*", cors());
 
 
 
@@ -82,6 +85,9 @@ app.use((req, res) => {
     res.status(404).json({ error: 'Route not found' });
 });
 
+app.get("/api/health", (req, res) => {
+    res.json({ status: "OK" });
+});
 
 
 app.listen(port, '0.0.0.0', () => {

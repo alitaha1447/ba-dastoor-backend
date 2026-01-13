@@ -19,12 +19,20 @@ const generalContentSchema = new mongoose.Schema(
             required: true,
             trim: true
         },
-        mediaType: { type: String, enum: ["image", "video"] },
+        // mediaType: { type: String, enum: ["image", "video"] },
+        // media: {
+        //     url: String,
+        //     publicId: String,
+        //     mediaType: String,
+        // }
         media: {
             url: String,
             publicId: String,
-            mediaType: String,
-        }
+            mediaType: {
+                type: String,
+                enum: ["image", "video"],
+            },
+        },
 
     },
     { timestamps: true }
