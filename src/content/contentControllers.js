@@ -37,12 +37,29 @@ module.exports = {
 
             /* ========= OPTIONAL MEDIA ========= */
             let mediaData;
+            // if (req.files?.media?.length) {
+            //     const mediaFile = req.files.media[0];
+            //     tempFiles.push(mediaFile);
+
+            //     const mediaUpload = await uploadToCloudinary(
+            //         mediaFile.path,
+            //         "content",
+            //         mediaType || "auto"
+            //     );
+
+            //     mediaData = {
+            //         url: mediaUpload.secure_url,
+            //         publicId: mediaUpload.public_id,
+            //         mediaType: mediaType || "auto",
+            //     };
+            //     console.log(req?.files)
+            //     console.log("mediaUpload ----> ", mediaUpload)
+            // }
             if (req.files?.media?.length) {
                 const mediaFile = req.files.media[0];
-                tempFiles.push(mediaFile);
 
                 const mediaUpload = await uploadToCloudinary(
-                    mediaFile.path,
+                    mediaFile,
                     "content",
                     mediaType || "auto"
                 );
@@ -52,18 +69,16 @@ module.exports = {
                     publicId: mediaUpload.public_id,
                     mediaType: mediaType || "auto",
                 };
-                console.log(req?.files)
-                console.log("mediaUpload ----> ", mediaUpload)
             }
 
             /* ========= OPTIONAL LOGO ========= */
             let logoData;
             if (req.files?.logo?.length) {
                 const logoFile = req.files.logo[0];
-                tempFiles.push(logoFile);
+                // tempFiles.push(logoFile);
 
                 const logoUpload = await uploadToCloudinary(
-                    logoFile.path,
+                    logoFile,
                     "content",
                     "image"
                 );
@@ -94,16 +109,17 @@ module.exports = {
                 success: false,
                 message: error.message,
             });
-        } finally {
-            /* 🔥 CLEAN TEMP FILES */
-            for (const file of tempFiles) {
-                try {
-                    await fsPromises.unlink(file.path);
-                } catch {
-                    console.error(`❌ Failed to remove temp file: ${file.path}`);
-                }
-            }
         }
+        // finally {
+        //     /* 🔥 CLEAN TEMP FILES */
+        //     for (const file of tempFiles) {
+        //         try {
+        //             await fsPromises.unlink(file.path);
+        //         } catch {
+        //             console.error(`❌ Failed to remove temp file: ${file.path}`);
+        //         }
+        //     }
+        // }
     },
 
     getContentByPage: async (req, res) => {
