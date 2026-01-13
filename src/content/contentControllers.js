@@ -52,6 +52,8 @@ module.exports = {
                     publicId: mediaUpload.public_id,
                     mediaType: mediaType || "auto",
                 };
+                console.log(req?.files)
+                console.log("mediaUpload ----> ", mediaUpload)
             }
 
             /* ========= OPTIONAL LOGO ========= */
@@ -80,7 +82,7 @@ module.exports = {
                 ...(mediaData && { media: mediaData }),
                 ...(logoData && { logo: logoData }),
             });
-
+            console.log('content --> ', content)
             return res.status(201).json({
                 success: true,
                 message: "Content created successfully",
