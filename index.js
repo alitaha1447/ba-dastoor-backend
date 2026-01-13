@@ -49,7 +49,7 @@ app.use(cors({
     allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
-app.options("*", cors());
+app.options("/*", cors());
 
 
 /* -------------------- ROUTES -------------------- */
@@ -83,9 +83,6 @@ app.use((req, res) => {
     res.status(404).json({ error: 'Route not found' });
 });
 
-app.get("/api/health", (req, res) => {
-    res.json({ status: "OK" });
-});
 
 
 app.listen(port, '0.0.0.0', () => {
