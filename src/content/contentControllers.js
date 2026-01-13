@@ -5,7 +5,7 @@ const cloudinary = require('../config/cloudinary')
 
 module.exports = {
     createContent: async (req, res) => {
-        const tempFiles = [];
+        // const tempFiles = [];
 
         try {
             const { page } = req.query;
@@ -37,29 +37,12 @@ module.exports = {
 
             /* ========= OPTIONAL MEDIA ========= */
             let mediaData;
-            // if (req.files?.media?.length) {
-            //     const mediaFile = req.files.media[0];
-            //     tempFiles.push(mediaFile);
-
-            //     const mediaUpload = await uploadToCloudinary(
-            //         mediaFile.path,
-            //         "content",
-            //         mediaType || "auto"
-            //     );
-
-            //     mediaData = {
-            //         url: mediaUpload.secure_url,
-            //         publicId: mediaUpload.public_id,
-            //         mediaType: mediaType || "auto",
-            //     };
-            //     console.log(req?.files)
-            //     console.log("mediaUpload ----> ", mediaUpload)
-            // }
             if (req.files?.media?.length) {
                 const mediaFile = req.files.media[0];
+                tempFiles.push(mediaFile);
 
                 const mediaUpload = await uploadToCloudinary(
-                    mediaFile,
+                    mediaFile.path,
                     "content",
                     mediaType || "auto"
                 );
@@ -69,16 +52,33 @@ module.exports = {
                     publicId: mediaUpload.public_id,
                     mediaType: mediaType || "auto",
                 };
+                console.log(req?.files)
+                console.log("mediaUpload ----> ", mediaUpload)
             }
+            // if (req.files?.media?.length) {
+            //     const mediaFile = req.files.media[0];
+
+            //     const mediaUpload = await uploadToCloudinary(
+            //         mediaFile,
+            //         "content",
+            //         mediaType || "auto"
+            //     );
+
+            //     mediaData = {
+            //         url: mediaUpload.secure_url,
+            //         publicId: mediaUpload.public_id,
+            //         mediaType: mediaType || "auto",
+            //     };
+            // }
 
             /* ========= OPTIONAL LOGO ========= */
             let logoData;
             if (req.files?.logo?.length) {
                 const logoFile = req.files.logo[0];
-                // tempFiles.push(logoFile);
+                tempFiles.push(logoFile);
 
                 const logoUpload = await uploadToCloudinary(
-                    logoFile,
+                    logoFile.path,
                     "content",
                     "image"
                 );
@@ -110,6 +110,24 @@ module.exports = {
                 message: error.message,
             });
         }
+        finally {
+            /* 🔥 CLEAN ALL MULTER FILES (MEDIA + LOGO) */
+            if (req.files) {
+                const allFiles = Object.values(req.files).flat();
+
+                for (const file of allFiles) {
+                    try {
+                        // Small delay fixes Windows file lock
+                        await new Promise(resolve => setTimeout(resolve, 50));
+                        await fsPromises.unlink(file.path);
+                        console.log("🗑️ Deleted:", file.path);
+                    } catch (err) {
+                        console.error("❌ Failed to delete:", file.path, err.message);
+                    }
+                }
+            }
+        }
+
         // finally {
         //     /* 🔥 CLEAN TEMP FILES */
         //     for (const file of tempFiles) {
