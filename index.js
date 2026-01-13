@@ -33,24 +33,24 @@ connectDB();
 /* -------------------- MIDDLEWARE -------------------- */
 
 app.use(express.json())
-app.use(cors({
-    origin: (origin, callback) => {
-        if (
-            !origin ||
-            origin.startsWith("http://localhost") ||
-            origin.endsWith(".vercel.app")
-        ) {
-            return callback(null, true);
-        }
-        return callback(new Error("Not allowed by CORS"));
-    },
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
-}));
+// app.use(cors({
+//     origin: (origin, callback) => {
+//         if (
+//             !origin ||
+//             origin.startsWith("http://localhost") ||
+//             origin.endsWith(".vercel.app")
+//         ) {
+//             return callback(null, true);
+//         }
+//         return callback(new Error("Not allowed by CORS"));
+//     },
+//     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+//     allowedHeaders: ["Content-Type", "Authorization"],
+//     credentials: true,
+// }));
 
 // 🔥 REQUIRED FOR PUT + FormData
-// app.options("/*", cors());
+app.use(cors());
 
 
 
