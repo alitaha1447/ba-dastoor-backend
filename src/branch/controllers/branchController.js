@@ -541,7 +541,7 @@ exports.editBranchById = async (req, res) => {
 /* ================= GET ALL ================= */
 exports.getBranches = async (req, res) => {
     try {
-        const branches = await Branch.find().sort({ createdAt: -1 });
+        const branches = await Branch.find().sort({ createdAt: 1 });
         res.status(200).json({ success: true, data: branches });
     } catch (err) {
         res.status(500).json({ message: "Fetch failed" });

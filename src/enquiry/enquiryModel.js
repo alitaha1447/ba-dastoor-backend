@@ -7,6 +7,8 @@ const enquirySchema = new mongoose.Schema({
     email: { type: String, trim: true },
     phone: { type: String, trim: true },
     message: { type: String, trim: true },
+    // Franchise
+    city: String,
     // Catering
     eventType: String,
     eventDate: Date,

@@ -155,11 +155,24 @@ module.exports = {
 
     getAllGalleries: async (req, res) => {
         try {
+            const page = parseInt(req.query.page) || 1;
+            const limit = 1; // ✅ 1 slot per page
+            const skip = (page - 1) * limit;
+
             const galleries = await NewGallery.find()
-                .sort({ createdAt: -1 });
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit);
+
+            const total = await NewGallery.countDocuments();
+            const totalPages = Math.ceil(total / limit);
+
 
             return res.status(200).json({
                 success: true,
+                page,
+                totalPages,
+                hasNextPage: page < totalPages, // ✅ ADD THIS
                 count: galleries.length,
                 data: galleries,
             });
