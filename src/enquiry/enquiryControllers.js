@@ -177,7 +177,6 @@ module.exports = {
                 transporter.sendMail(mailOptions),
                 sendThankYouEmail(data.email, data.name, enquiryType),
             ]);
-            await transporter.sendMail(mailOptions);
 
             res.status(201).json({
                 success: true,
