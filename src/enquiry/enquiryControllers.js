@@ -154,11 +154,19 @@ module.exports = {
     `,
             };
 
-            // 🚀 send both (non-blocking)
-            await Promise.all([
-                transporter.sendMail(adminMail),
-                data.email && transporter.sendMail(userMail),
-            ]);
+            // ✅ NON-BLOCKING EMAIL (API NEVER HANGS)
+            const isValidEmail = (email) =>
+                /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+            const mailPromises = [transporter.sendMail(adminMail)];
+
+            if (data.email && isValidEmail(data.email)) {
+                mailPromises.push(transporter.sendMail(userMail));
+            }
+
+            Promise.allSettled(mailPromises)
+                .then((results) => console.log("Mail results:", results))
+                .catch((err) => console.error("Mail error:", err));
             // 📧 Send Email to Admin
             // const mailOptions = {
             //     from: `"Website Enquiry" <${process.env.ADMIN_EMAIL}>`,
