@@ -158,25 +158,25 @@ module.exports = {
             //     //         ]
             //     //         : [],
             // };
-            const mailOptions = {
-                from: `"Website Enquiry" <${process.env.ADMIN_EMAIL}>`,
-                to: process.env.ADMIN_EMAIL,
-                subject: `New ${enquiryType.toUpperCase()} Enquiry`,
-                html: `
-                <h2>New Enquiry Received</h2>
-                <p><b>Type:</b> ${enquiryType}</p>
-                <p><b>Name:</b> ${data.name || "-"}</p>
-                <p><b>Email:</b> ${data.email || "-"}</p>
-                <p><b>Phone:</b> ${data.phone || "-"}</p>
+            // const mailOptions = {
+            //     from: `"Website Enquiry" <${process.env.ADMIN_EMAIL}>`,
+            //     to: process.env.ADMIN_EMAIL,
+            //     subject: `New ${enquiryType.toUpperCase()} Enquiry`,
+            //     html: `
+            //     <h2>New Enquiry Received</h2>
+            //     <p><b>Type:</b> ${enquiryType}</p>
+            //     <p><b>Name:</b> ${data.name || "-"}</p>
+            //     <p><b>Email:</b> ${data.email || "-"}</p>
+            //     <p><b>Phone:</b> ${data.phone || "-"}</p>
 
-            `
-                ,
-            };
-            // 🚀 Send both emails in parallel
-            await Promise.all([
-                transporter.sendMail(mailOptions),
-                sendThankYouEmail(data.email, data.name, enquiryType),
-            ]);
+            // `
+            //     ,
+            // };
+            // // 🚀 Send both emails in parallel
+            // await Promise.all([
+            //     transporter.sendMail(mailOptions),
+            //     sendThankYouEmail(data.email, data.name, enquiryType),
+            // ]);
 
             res.status(201).json({
                 success: true,
