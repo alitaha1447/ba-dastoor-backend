@@ -131,6 +131,34 @@ module.exports = {
             console.log('4')
             const enquiry = await Enquiry.create(data);
             console.log(enquiry)
+            // new code for mail
+            const adminMail = {
+                from: `"Website Enquiry" <${process.env.SMTP_USER}>`,
+                to: process.env.ADMIN_EMAIL,
+                subject: `New ${enquiryType.toUpperCase()} Enquiry`,
+                html: `
+        <h2>New Enquiry Received</h2>
+        <p><b>Type:</b> ${enquiryType}</p>
+        <p><b>Name:</b> ${data.name || "-"}</p>
+        <p><b>Email:</b> ${data.email || "-"}</p>
+        <p><b>Phone:</b> ${data.phone || "-"}</p>
+    `,
+            };
+            const userMail = {
+                from: `"Ba-Dastoor" <${process.env.SMTP_USER}>`,
+                to: data.email,
+                subject: "Thank you for contacting us",
+                html: `
+        <p>Hi ${data.name || "there"},</p>
+        <p>Thank you for reaching out. We’ll get back to you shortly.</p>
+    `,
+            };
+
+            // 🚀 send both (non-blocking)
+            await Promise.all([
+                transporter.sendMail(adminMail),
+                data.email && transporter.sendMail(userMail),
+            ]);
             // 📧 Send Email to Admin
             // const mailOptions = {
             //     from: `"Website Enquiry" <${process.env.ADMIN_EMAIL}>`,
