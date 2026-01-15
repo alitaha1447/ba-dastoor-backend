@@ -185,6 +185,26 @@ module.exports = {
             });
         }
     },
+    getAllGalleriesAdmin: async (req, res) => {
+        try {
+            const galleries = await NewGallery.find()
+                .sort({ createdAt: -1 }); // latest first
+
+            return res.status(200).json({
+                success: true,
+                count: galleries.length,
+                data: galleries,
+            });
+
+        } catch (error) {
+            console.error("ADMIN GET ALL GALLERY ERROR:", error);
+            return res.status(500).json({
+                success: false,
+                message: error.message,
+            });
+        }
+    },
+
     deleteGalleryById: async (req, res) => {
         try {
             const { id } = req.params;

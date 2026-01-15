@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const upload = require('../../middleware/newUpload')
 
-const { uploadGalleryImages, getAllGalleries, deleteGalleryById, editGalleryImages } = require('../newGallery/galleryControllers')
+const { uploadGalleryImages, getAllGalleries, getAllGalleriesAdmin, deleteGalleryById, editGalleryImages } = require('../newGallery/galleryControllers')
 
 router.post(
     "/new-upload-galleryImg",
@@ -18,6 +18,7 @@ router.post(
     uploadGalleryImages
 );
 router.get("/new-get-galleryImg", getAllGalleries);
+router.get("/new-get-galleryImgAdmin", getAllGalleriesAdmin);
 router.delete("/new-delete-galleryImg/:id", deleteGalleryById);
 router.put("/new-edit-galleryImg/:id",
     upload.fields([
