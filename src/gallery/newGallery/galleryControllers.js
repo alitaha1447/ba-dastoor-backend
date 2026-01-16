@@ -1,6 +1,8 @@
 const NewGallery = require("../newGallery/galleryModel");
 const uploadToCloudinary = require("../../utils/branchCloudinary");
 const cloudinary = require('../../config/cloudinary')
+const { buildImageUrl } = require("../../utils/buildImageUrl");
+
 const fsPromises = require("fs/promises");
 
 const SLOTS = ["primary", "sibling1", "sibling2", "sibling3", "sibling4", "sibling5"];
@@ -28,7 +30,7 @@ module.exports = {
             );
 
             const primaryImage = {
-                url: primaryUpload.secure_url,
+                // url: primaryUpload.secure_url,
                 publicId: primaryUpload.public_id,
             };
 
@@ -60,7 +62,7 @@ module.exports = {
 
                 siblings.push({
                     slot: key, // ✅ VERY IMPORTANT
-                    url: upload.secure_url,
+                    // url: upload.secure_url,
                     publicId: upload.public_id,
                 });
             }
@@ -167,6 +169,25 @@ module.exports = {
             const total = await NewGallery.countDocuments();
             const totalPages = Math.ceil(total / limit);
 
+            // NEW CODE FOR IMAGE OPTIMIZATION GET
+            const formattedData = galleries.map((gallery) => ({
+                _id: gallery._id,
+                createdAt: gallery.createdAt,
+
+                primaryImage: {
+                    url: buildImageUrl(
+                        gallery.primaryImage.publicId,
+                        1200,
+                        800
+                    ),
+                },
+
+                siblings: gallery.siblings.map((s) => ({
+                    slot: s.slot,
+                    url: buildImageUrl(s.publicId, 600, 600),
+                })),
+            }));
+
 
             return res.status(200).json({
                 success: true,
@@ -174,7 +195,8 @@ module.exports = {
                 totalPages,
                 hasNextPage: page < totalPages, // ✅ ADD THIS
                 count: galleries.length,
-                data: galleries,
+                // data: galleries,
+                data: formattedData,
             });
 
         } catch (error) {
@@ -190,10 +212,33 @@ module.exports = {
             const galleries = await NewGallery.find()
                 .sort({ createdAt: -1 }); // latest first
 
+            // NEW CODE FOR IMAGE OPTIMIZATION GET
+            const formattedData = galleries.map((gallery) => ({
+                _id: gallery._id,
+                createdAt: gallery.createdAt,
+
+                primaryImage: {
+                    publicId: gallery.primaryImage.publicId,
+                    url: buildImageUrl(
+                        gallery.primaryImage.publicId,
+                        300,
+                        200
+                    ),
+                },
+
+                siblings: gallery.siblings.map((s) => ({
+                    slot: s.slot,
+                    publicId: s.publicId,
+                    url: buildImageUrl(s.publicId, 200, 200),
+                })),
+            }));
+
+
             return res.status(200).json({
                 success: true,
                 count: galleries.length,
-                data: galleries,
+                // data: galleries,
+                data: formattedData,
             });
 
         } catch (error) {
@@ -288,7 +333,7 @@ module.exports = {
                 const upload = await uploadToCloudinary(file.path, "gallery");
 
                 gallery.primaryImage = {
-                    url: upload.secure_url,
+                    // url: upload.secure_url,
                     publicId: upload.public_id,
                 };
             }
@@ -315,14 +360,14 @@ module.exports = {
                     // replace only this slot
                     gallery.siblings[index] = {
                         slot: key,
-                        url: upload.secure_url,
+                        // url: upload.secure_url,
                         publicId: upload.public_id,
                     };
                 } else {
                     // add new slot if not present
                     gallery.siblings.push({
                         slot: key,
-                        url: upload.secure_url,
+                        // url: upload.secure_url,
                         publicId: upload.public_id,
                     });
                 }
