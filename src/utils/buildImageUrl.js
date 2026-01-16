@@ -6,6 +6,7 @@ exports.buildImageUrl = (publicId, width, height) =>
         width,
         height,
         crop: "fill",
-        format: "auto",
-        quality: "auto:best", // better quality
+        fetch_format: "auto", // 🔥 better than format
+        quality: "auto",
+        secure: true,         // ✅ THIS FIXES YOUR ISSUE
     });
