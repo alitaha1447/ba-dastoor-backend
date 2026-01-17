@@ -6,10 +6,10 @@ const cloudinary = require('../config/cloudinary')
 module.exports = {
     createContent: async (req, res) => {
         // const tempFiles = [];
-
+        console.log('REQ BODY -->', req.body)
         try {
             const { page } = req.query;
-            const { heading, description, mediaType } = req.body;
+            const { heading, description, secondaryHeading, secondaryDescription, mediaType } = req.body;
 
             if (!page) {
                 return res.status(400).json({
@@ -94,6 +94,8 @@ module.exports = {
                 page,
                 heading,
                 description,
+                secondaryHeading,
+                secondaryDescription,
                 ...(mediaData && { media: mediaData }),
                 ...(logoData && { logo: logoData }),
             });
@@ -214,10 +216,10 @@ module.exports = {
     },
     updateContentByPage: async (req, res) => {
         const tempFiles = [];
-
+        console.log('REQ BODY -->', req.body)
         try {
             const { page } = req.query;
-            const { heading, description, mediaType } = req.body;
+            const { heading, description, secondaryHeading, secondaryDescription, mediaType } = req.body;
 
             if (!page) {
                 return res.status(400).json({
@@ -237,6 +239,8 @@ module.exports = {
             /* ========= UPDATE TEXT ========= */
             if (heading) content.heading = heading;
             if (description) content.description = description;
+            if (secondaryHeading) content.secondaryHeading = secondaryHeading;
+            if (secondaryDescription) content.secondaryDescription = secondaryDescription;
 
             /* ========= UPDATE MEDIA ========= */
             if (req.files?.media?.length) {

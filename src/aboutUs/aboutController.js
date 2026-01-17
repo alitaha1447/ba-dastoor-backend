@@ -9,9 +9,9 @@ module.exports = {
         const tempPaths = []; // 🔴 track temp files
 
         try {
-            const { heading, ownerName, description, aboutUsHeading, aboutUsPara } = req.body || {};
+            const { heading, ownerName, description, } = req.body || {};
 
-            if (!heading || !ownerName || !description || !aboutUsHeading || !aboutUsPara) {
+            if (!heading || !ownerName || !description) {
                 return res.status(400).json({
                     success: false,
                     message: "All fields are required",
@@ -45,8 +45,6 @@ module.exports = {
                 heading,
                 ownerName,
                 description,
-                aboutUsHeading,
-                aboutUsPara,
                 ownerImage: {
                     url: uploadResult.secure_url,
                     publicId: uploadResult.public_id,
@@ -101,7 +99,7 @@ module.exports = {
         let oldPublicId = null;
 
         try {
-            const { heading, ownerName, description, aboutUsHeading, aboutUsPara } = req.body || {};
+            const { heading, ownerName, description, } = req.body || {};
 
             const existing = await AboutUs.findOne();
             if (!existing) {
@@ -115,8 +113,6 @@ module.exports = {
                 ...(heading !== undefined && { heading }),
                 ...(ownerName !== undefined && { ownerName }),
                 ...(description !== undefined && { description }),
-                ...(aboutUsHeading !== undefined && { aboutUsHeading }),
-                ...(aboutUsPara !== undefined && { aboutUsPara }),
             };
 
             /* IMAGE UPDATE */

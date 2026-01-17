@@ -19,6 +19,14 @@ const generalContentSchema = new mongoose.Schema(
             required: true,
             trim: true
         },
+        secondaryHeading: {
+            type: String,
+            trim: true
+        },
+        secondaryDescription: {
+            type: String,
+            trim: true
+        },
         // mediaType: { type: String, enum: ["image", "video"] },
         // media: {
         //     url: String,
