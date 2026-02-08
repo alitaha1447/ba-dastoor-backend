@@ -59,4 +59,17 @@ module.exports = {
             res.status(500).json({ success: false, message: "Failed to update category" });
         }
     },
+    deleteCategory: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const content = await Category.findById(id);
+            await content.deleteOne();
+            return res.status(200).json({
+                success: true,
+                message: "Category deleted successfully",
+            });
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    },
 }
