@@ -13,7 +13,7 @@ module.exports = {
         // const files = req.files || [];
         try {
             const files = req.files;
-
+            console.log('-------->', files)
             if (!files?.primary) {
                 return res.status(400).json({
                     success: false,
@@ -21,9 +21,16 @@ module.exports = {
                 });
             }
 
+            /* ======= REGISTER ALL TEMP FILES FIRST ======= */
+            for (const key of Object.keys(files)) {
+                const file = files[key]?.[0];
+                if (file?.path) {
+                    tempPaths.push(file.path);
+                }
+            }
             /* ========= PRIMARY ========= */
             const primaryFile = files.primary[0];
-            tempPaths.push(primaryFile.path);
+            // tempPaths.push(primaryFile.path);
 
             const primaryUpload = await uploadToCloudinary(
                 primaryFile.path, "gallery"
@@ -56,7 +63,7 @@ module.exports = {
                 if (!key.startsWith("sibling")) continue;
 
                 const file = files[key][0];
-                tempPaths.push(file.path);
+                // tempPaths.push(file.path);
 
                 const upload = await uploadToCloudinary(file.path, "gallery");
 
@@ -140,18 +147,35 @@ module.exports = {
             });
         } finally {
             // 🧹 ALWAYS cleanup temp files (ASYNC + SAFE)
-            for (const filePath of tempPaths) {
-                try {
-                    await fsPromises.unlink(filePath);
-                    console.log("🧹 Temp file deleted:", filePath);
-                } catch (err) {
-                    console.error(
-                        "❌ Failed to delete temp file:",
-                        filePath,
-                        err.message
-                    );
-                }
-            }
+            // for (const filePath of tempPaths) {
+            //     try {
+            //         await fsPromises.unlink(filePath);
+            //         console.log("🧹 Temp file deleted:", filePath);
+            //     } catch (err) {
+            //         console.error(
+            //             "❌ Failed to delete temp file:",
+            //             filePath,
+            //             err.message
+            //         );
+            //     }
+            // }
+            /* ========= CLEANUP ========= */
+            await Promise.all(
+                tempPaths.map(async (filePath) => {
+                    try {
+                        await fsPromises.unlink(filePath);
+                        console.log("🧹 Temp file deleted:", filePath);
+                    } catch (err) {
+                        if (err.code !== "ENOENT") {
+                            console.error(
+                                "❌ Failed to delete temp file:",
+                                filePath,
+                                err.message
+                            );
+                        }
+                    }
+                })
+            );
         }
     },
 

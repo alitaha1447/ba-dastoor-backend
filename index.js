@@ -18,9 +18,11 @@ const newGalleryVideoRoutes = require('./src/gallery/newGalleryVideos/galleryVid
 const aboutUsRoutes = require('./src/aboutUs/aboutRoute.js')
 const generalContentRoutes = require('./src/content/contentRoutes.js')
 const teamRoutes = require('./src/teams/teamRoutes.js')
+const seoRoutes = require('./src/seo/seoRoutes.js')
+const cleanupTempFiles = require('./src/middleware/cleanupTempFiles.js')
 
 const app = express()
-const port = process.env.PORT || 3000
+const port = process.env.PORT
 
 // 👇 ADD THIS
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -71,14 +73,32 @@ app.use("/api/newGalleryVideo", newGalleryVideoRoutes)
 app.use("/api/aboutUs", aboutUsRoutes)
 app.use("/api/generalContent", generalContentRoutes)
 app.use("/api/team", teamRoutes)
+app.use("/api/seo", seoRoutes)
+
+// 🔥 runs ONLY on errors (multer size/type)
+// app.use(cleanupTempFiles);
 
 
 
 // Error handling middleware
+// 3️⃣ Global error handler (errors)
 app.use((err, req, res, next) => {
     console.error(err.stack);
-    res.status(500).json({ error: 'Something went wrong!' });
+
+    if (err.code === "LIMIT_FILE_SIZE") {
+        return res.status(400).json({
+            error: "File too large. Max 10MB allowed",
+        });
+    }
+
+    res.status(err.statusCode || 500).json({
+        error: "Something went wrong!",
+    });
 });
+// app.use((err, req, res, next) => {
+//     console.error(err.stack);
+//     res.status(500).json({ error: 'Something went wrong!' });
+// });
 
 // 404 handler
 app.use((req, res) => {

@@ -17,16 +17,7 @@ const enquirySchema = new mongoose.Schema({
     // Career
     position: String,
     experience: String,
-    // resume: {
-    //     // filename: String,
-    //     // path: String,
-    //     // mimetype: String,
-    //     // size: Number,
-    //     url: String,
-    //     public_id: String,
-    //     originalName: String,
-    //     mimetype: String,
-    //     size: Number,
+
     // },
 }, { timestamps: true });
 
