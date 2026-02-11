@@ -3,123 +3,124 @@ const uploadToCloudinary = require('../../utils/videoUploadToCloudinary')
 const cloudinary = require('../../config/cloudinary')
 // const fs = require("fs");
 const fsPromises = require("fs/promises");
+const path = require("path");
 
 
 module.exports = {
-    uploadGalleryVideos: async (req, res) => {
-        const tempPaths = [];
-        // const files = req.files || [];
-        try {
-            const files = req.files;
+    // uploadGalleryVideos: async (req, res) => {
+    //     const tempPaths = [];
+    //     // const files = req.files || [];
+    //     try {
+    //         const files = req.files;
 
-            if (!files?.primary) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Primary video is required",
-                });
-            }
+    //         if (!files?.primary) {
+    //             return res.status(400).json({
+    //                 success: false,
+    //                 message: "Primary video is required",
+    //             });
+    //         }
 
-            /* ========= PRIMARY ========= */
-            const primaryFile = files.primary[0];
-            tempPaths.push(primaryFile.path);
+    //         /* ========= PRIMARY ========= */
+    //         const primaryFile = files.primary[0];
+    //         tempPaths.push(primaryFile.path);
 
-            const primaryUpload = await uploadToCloudinary(
-                primaryFile.path, "galleryVideo"
-            );
+    //         const primaryUpload = await uploadToCloudinary(
+    //             primaryFile.path, "galleryVideo"
+    //         );
 
-            const primaryVideo = {
-                url: primaryUpload.secure_url,
-                publicId: primaryUpload.public_id,
-            };
-
-
-            /* ========= SIBLINGS ========= */
-            // const siblings = [];
-
-            // for (const key of Object.keys(files)) {
-            //     if (!key.startsWith("sibling")) continue;
-
-            //     const file = files[key][0];
-            //     tempPaths.push(file.path);
-
-            //     const upload = await uploadToCloudinary(file.path, "galleryVideo");
-
-            //     siblings.push({
-            //         slot: key, // ✅ VERY IMPORTANT
-            //         url: upload.secure_url,
-            //         publicId: upload.public_id,
-            //     });
-            // }
-            const siblingKeys = Object.keys(files).filter(k => k.startsWith("sibling"));
-
-            const siblings = await Promise.all(
-                siblingKeys.map(async (key) => {
-                    const file = files[key][0];
-                    tempPaths.push(file.path);
-
-                    const upload = await uploadToCloudinary(
-                        file.path,
-                        "galleryVideo",
-                        { resource_type: "video" }
-                    );
-
-                    return {
-                        slot: key,
-                        url: upload.secure_url,
-                        publicId: upload.public_id,
-                    };
-                })
-            );
+    //         const primaryVideo = {
+    //             url: primaryUpload.secure_url,
+    //             publicId: primaryUpload.public_id,
+    //         };
 
 
-            const gallery = await NewGalleryVideo.create({
-                primaryVideo,
-                siblings,
-            });
+    //         /* ========= SIBLINGS ========= */
+    //         // const siblings = [];
 
-            res.status(201).json({
-                success: true,
-                data: gallery,
-            })
+    //         // for (const key of Object.keys(files)) {
+    //         //     if (!key.startsWith("sibling")) continue;
+
+    //         //     const file = files[key][0];
+    //         //     tempPaths.push(file.path);
+
+    //         //     const upload = await uploadToCloudinary(file.path, "galleryVideo");
+
+    //         //     siblings.push({
+    //         //         slot: key, // ✅ VERY IMPORTANT
+    //         //         url: upload.secure_url,
+    //         //         publicId: upload.public_id,
+    //         //     });
+    //         // }
+    //         const siblingKeys = Object.keys(files).filter(k => k.startsWith("sibling"));
+
+    //         const siblings = await Promise.all(
+    //             siblingKeys.map(async (key) => {
+    //                 const file = files[key][0];
+    //                 tempPaths.push(file.path);
+
+    //                 const upload = await uploadToCloudinary(
+    //                     file.path,
+    //                     "galleryVideo",
+    //                     { resource_type: "video" }
+    //                 );
+
+    //                 return {
+    //                     slot: key,
+    //                     url: upload.secure_url,
+    //                     publicId: upload.public_id,
+    //                 };
+    //             })
+    //         );
+
+
+    //         const gallery = await NewGalleryVideo.create({
+    //             primaryVideo,
+    //             siblings,
+    //         });
+
+    //         res.status(201).json({
+    //             success: true,
+    //             data: gallery,
+    //         })
 
 
 
-        } catch (error) {
-            console.error("GALLERY ERROR:", error);
-            return res.status(500).json({
-                success: false,
-                message: error.message,
-            });
-        } finally {
-            for (const filePath of tempPaths) {
-                try {
-                    await fsPromises.unlink(filePath);
-                    console.log("Temp deleted:", filePath);
-                } catch (err) {
-                    console.error("Temp delete failed:", filePath, err.message);
-                }
-            }
-        }
-    },
-    getAllGalleryVideos: async (req, res) => {
-        try {
-            const galleries = await NewGalleryVideo.find()
-                .sort({ createdAt: -1 });
+    //     } catch (error) {
+    //         console.error("GALLERY ERROR:", error);
+    //         return res.status(500).json({
+    //             success: false,
+    //             message: error.message,
+    //         });
+    //     } finally {
+    //         for (const filePath of tempPaths) {
+    //             try {
+    //                 await fsPromises.unlink(filePath);
+    //                 console.log("Temp deleted:", filePath);
+    //             } catch (err) {
+    //                 console.error("Temp delete failed:", filePath, err.message);
+    //             }
+    //         }
+    //     }
+    // },
+    // getAllGalleryVideos: async (req, res) => {
+    //     try {
+    //         const galleries = await NewGalleryVideo.find()
+    //             .sort({ createdAt: -1 });
 
-            return res.status(200).json({
-                success: true,
-                count: galleries.length,
-                data: galleries,
-            });
+    //         return res.status(200).json({
+    //             success: true,
+    //             count: galleries.length,
+    //             data: galleries,
+    //         });
 
-        } catch (error) {
-            console.error("GET ALL GALLERY ERROR:", error);
-            return res.status(500).json({
-                success: false,
-                message: error.message,
-            });
-        }
-    },
+    //     } catch (error) {
+    //         console.error("GET ALL GALLERY ERROR:", error);
+    //         return res.status(500).json({
+    //             success: false,
+    //             message: error.message,
+    //         });
+    //     }
+    // },
     getAllGalleryVideosByPagination: async (req, res) => {
         try {
             const page = parseInt(req.query.page) || 1;
@@ -297,5 +298,247 @@ module.exports = {
                 }
             }
         }
-    }
+    },
+
+    // 
+    uploadGalleryVideos: async (req, res) => {
+        try {
+            const files = req.files;
+            if (!files?.primary?.[0]) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Primary video is required",
+                });
+            }
+            /* PRIMARY */
+            const primaryFile = files.primary[0];
+
+            const primaryVideo = {
+                url: `/uploads/${primaryFile.filename}`,
+                publicId: primaryFile.filename,
+            };
+            /* SIBLINGS */
+            const siblings = [];
+            for (const key of Object.keys(files)) {
+                if (!key.startsWith("sibling")) continue;
+
+                const file = files[key][0];
+
+                siblings.push({
+                    slot: key,
+                    url: `/uploads/${file.filename}`,
+                    publicId: file.filename,
+                });
+            }
+            const gallery = await NewGalleryVideo.create({
+                primaryVideo,
+                siblings,
+            });
+            res.status(201).json({
+                success: true,
+                data: gallery,
+            });
+        } catch (error) {
+            console.error("VIDEO GALLERY ERROR:", error);
+            res.status(500).json({
+                success: false,
+                message: error.message,
+            });
+        }
+    },
+    getAllGalleryVideos: async (req, res) => {
+        try {
+            const galleries = await NewGalleryVideo.find()
+                .sort({ createdAt: -1 });
+
+            res.status(200).json({
+                success: true,
+                count: galleries.length,
+                data: galleries,
+            });
+
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: error.message,
+            });
+        }
+    },
+    getAllGalleryVideosByPagination: async (req, res) => {
+        try {
+            const page = parseInt(req.query.page) || 1;
+            const limit = 1;
+            const skip = (page - 1) * limit;
+
+            const galleries = await NewGalleryVideo.find()
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit);
+
+            const total = await NewGalleryVideo.countDocuments();
+            const totalPages = Math.ceil(total / limit);
+
+            res.status(200).json({
+                success: true,
+                page,
+                totalPages,
+                hasNextPage: page < totalPages,
+                count: galleries.length,
+                data: galleries,
+            });
+
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: error.message,
+            });
+        }
+    },
+    deleteGalleryVideoById: async (req, res) => {
+        try {
+            const { id } = req.params;
+
+            const gallery = await NewGalleryVideo.findById(id);
+            if (!gallery) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Gallery not found",
+                });
+            }
+
+            // Delete primary video
+            if (gallery.primaryVideo?.publicId) {
+                const primaryPath = path.join(
+                    process.cwd(),
+                    "uploads",
+                    "media",
+                    gallery.primaryVideo.publicId
+                );
+
+                try {
+                    await fsPromises.unlink(primaryPath);
+                } catch { }
+            }
+
+            // Delete siblings
+            if (Array.isArray(gallery.siblings)) {
+                for (const vid of gallery.siblings) {
+                    if (vid.publicId) {
+                        const filePath = path.join(
+                            process.cwd(),
+                            "uploads",
+                            "media",
+                            vid.publicId
+                        );
+
+                        try {
+                            await fsPromises.unlink(filePath);
+                        } catch { }
+                    }
+                }
+            }
+
+            await NewGalleryVideo.findByIdAndDelete(id);
+
+            res.status(200).json({
+                success: true,
+                message: "Gallery videos deleted successfully",
+            });
+
+        } catch (error) {
+            console.error("DELETE VIDEO ERROR:", error);
+            res.status(500).json({
+                success: false,
+                message: error.message,
+            });
+        }
+    },
+    editGalleryVideo: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const files = req.files || {};
+
+            const gallery = await NewGalleryVideo.findById(id);
+            if (!gallery) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Gallery not found",
+                });
+            }
+
+            /* UPDATE PRIMARY */
+            if (files.primary?.[0]) {
+                const file = files.primary[0];
+
+                if (gallery.primaryVideo?.publicId) {
+                    const oldPath = path.join(
+                        process.cwd(),
+                        "uploads",
+                        "media",
+                        gallery.primaryVideo.publicId
+                    );
+
+                    try {
+                        await fsPromises.unlink(oldPath);
+                    } catch { }
+                }
+
+                gallery.primaryVideo = {
+                    url: `/uploads/${file.filename}`,
+                    publicId: file.filename,
+                };
+            }
+
+            /* UPDATE SIBLINGS */
+            for (const key of Object.keys(files)) {
+                if (!key.startsWith("sibling")) continue;
+
+                const file = files[key][0];
+
+                const index = gallery.siblings.findIndex(
+                    (vid) => vid.slot === key
+                );
+
+                if (index !== -1) {
+                    const oldPath = path.join(
+                        process.cwd(),
+                        "uploads",
+                        "media",
+                        gallery.siblings[index].publicId
+                    );
+
+                    try {
+                        await fsPromises.unlink(oldPath);
+                    } catch { }
+
+                    gallery.siblings[index] = {
+                        slot: key,
+                        url: `/uploads/${file.filename}`,
+                        publicId: file.filename,
+                    };
+                } else {
+                    gallery.siblings.push({
+                        slot: key,
+                        url: `/uploads/${file.filename}`,
+                        publicId: file.filename,
+                    });
+                }
+            }
+
+            await gallery.save();
+
+            res.status(200).json({
+                success: true,
+                message: "Gallery videos updated successfully",
+                data: gallery,
+            });
+
+        } catch (error) {
+            console.error("EDIT VIDEO ERROR:", error);
+            res.status(500).json({
+                success: false,
+                message: error.message,
+            });
+        }
+    },
 }

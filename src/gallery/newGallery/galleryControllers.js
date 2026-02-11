@@ -4,77 +4,265 @@ const cloudinary = require('../../config/cloudinary')
 const { buildImageUrl } = require("../../utils/buildImageUrl");
 
 const fsPromises = require("fs/promises");
+const path = require("path");
 
 const SLOTS = ["primary", "sibling1", "sibling2", "sibling3", "sibling4", "sibling5"];
 
 module.exports = {
+    // uploadGalleryImages: async (req, res) => {
+    //     const tempPaths = [];
+    //     // const files = req.files || [];
+    //     try {
+    //         const files = req.files;
+    //         console.log('-------->', files)
+    //         if (!files?.primary) {
+    //             return res.status(400).json({
+    //                 success: false,
+    //                 message: "Primary image is required",
+    //             });
+    //         }
+
+    //         /* ======= REGISTER ALL TEMP FILES FIRST ======= */
+    //         for (const key of Object.keys(files)) {
+    //             const file = files[key]?.[0];
+    //             if (file?.path) {
+    //                 tempPaths.push(file.path);
+    //             }
+    //         }
+    //         /* ========= PRIMARY ========= */
+    //         const primaryFile = files.primary[0];
+    //         // tempPaths.push(primaryFile.path);
+
+    //         const primaryUpload = await uploadToCloudinary(
+    //             primaryFile.path, "gallery"
+    //         );
+
+    //         const primaryImage = {
+    //             // url: primaryUpload.secure_url,
+    //             publicId: primaryUpload.public_id,
+    //         };
+
+    //         /* ========= SIBLINGS ========= */
+    //         // const siblings = [];
+
+    //         // for (const key of Object.keys(files)) {
+    //         //     if (!key.startsWith("sibling")) continue;
+
+    //         //     const file = files[key][0];
+    //         //     tempPaths.push(file.path); // 👈 save temp path
+
+    //         //     const upload = await uploadToCloudinary(file.path, "gallery");
+    //         //     siblings.push({
+    //         //         url: upload.secure_url,
+    //         //         publicId: upload.public_id,
+    //         //     });
+    //         // }
+    //         /* ========= SIBLINGS ========= */
+    //         const siblings = [];
+
+    //         for (const key of Object.keys(files)) {
+    //             if (!key.startsWith("sibling")) continue;
+
+    //             const file = files[key][0];
+    //             // tempPaths.push(file.path);
+
+    //             const upload = await uploadToCloudinary(file.path, "gallery");
+
+    //             siblings.push({
+    //                 slot: key, // ✅ VERY IMPORTANT
+    //                 // url: upload.secure_url,
+    //                 publicId: upload.public_id,
+    //             });
+    //         }
+
+
+    //         const gallery = await NewGallery.create({
+    //             primaryImage,
+    //             siblings,
+    //         });
+
+    //         res.status(201).json({
+    //             success: true,
+    //             data: gallery,
+    //         })
+
+    //         // const images = [];
+    //         // for (const slot of SLOTS) {
+    //         //     if (req.files?.[slot]?.[0]) {
+    //         //         const file = req.files[slot][0];
+    //         //         tempPaths.push(file.path); // 👈 save temp path
+
+    //         //         const upload = await uploadToCloudinary(file.path, "branches");
+
+    //         //         images.push({
+    //         //             url: upload.secure_url,
+    //         //             publicId: upload.public_id,
+    //         //         });
+    //         //     }
+    //         // }
+
+
+    //         // const files = req.files;
+    //         // if (!files || files.length === 0) {
+    //         //     return res.status(400).json({
+    //         //         success: false,
+    //         //         message: "At least one image is required",
+    //         //     });
+    //         // }
+
+    //         // const uploads = [];
+
+    //         // for (const file of files) {
+    //         //     tempPaths.push(file.path); // 👈 track temp files
+    //         //     const upload = await uploadToCloudinary(
+    //         //         file.path,
+    //         //         "newGallery"
+    //         //     );
+
+
+    //         //     uploads.push({
+    //         //         url: upload.secure_url,
+    //         //         publicId: upload.public_id,
+    //         //     });
+    //         // }
+
+    //         // const gallery = await NewGallery.create({
+    //         //     primaryImage: uploads[0],
+    //         //     siblings: uploads.slice(1),
+    //         // });
+    //         // const gallery = await NewGallery.create({
+    //         //     images
+    //         // });
+
+    //         // return res.status(201).json({
+    //         //     success: true,
+    //         //     message: "Gallery slot created successfully",
+    //         //     data: gallery,
+    //         // });
+
+    //     } catch (error) {
+    //         console.error("GALLERY ERROR:", error);
+    //         return res.status(500).json({
+    //             success: false,
+    //             message: error.message,
+    //         });
+    //     } finally {
+    //         // 🧹 ALWAYS cleanup temp files (ASYNC + SAFE)
+    //         // for (const filePath of tempPaths) {
+    //         //     try {
+    //         //         await fsPromises.unlink(filePath);
+    //         //         console.log("🧹 Temp file deleted:", filePath);
+    //         //     } catch (err) {
+    //         //         console.error(
+    //         //             "❌ Failed to delete temp file:",
+    //         //             filePath,
+    //         //             err.message
+    //         //         );
+    //         //     }
+    //         // }
+    //         /* ========= CLEANUP ========= */
+    //         await Promise.all(
+    //             tempPaths.map(async (filePath) => {
+    //                 try {
+    //                     await fsPromises.unlink(filePath);
+    //                     console.log("🧹 Temp file deleted:", filePath);
+    //                 } catch (err) {
+    //                     if (err.code !== "ENOENT") {
+    //                         console.error(
+    //                             "❌ Failed to delete temp file:",
+    //                             filePath,
+    //                             err.message
+    //                         );
+    //                     }
+    //                 }
+    //             })
+    //         );
+    //     }
+    // },
+
+    // getAllGalleries: async (req, res) => {
+    //     try {
+    //         const page = parseInt(req.query.page) || 1;
+    //         const limit = 1; // ✅ 1 slot per page
+    //         const skip = (page - 1) * limit;
+
+    //         const galleries = await NewGallery.find()
+    //             .sort({ createdAt: -1 })
+    //             .skip(skip)
+    //             .limit(limit);
+
+    //         const total = await NewGallery.countDocuments();
+    //         const totalPages = Math.ceil(total / limit);
+
+    //         // NEW CODE FOR IMAGE OPTIMIZATION GET
+    //         const formattedData = galleries.map((gallery) => ({
+    //             _id: gallery._id,
+    //             createdAt: gallery.createdAt,
+
+    //             primaryImage: {
+    //                 url: buildImageUrl(
+    //                     gallery.primaryImage.publicId,
+    //                     1200,
+    //                     800
+    //                 ),
+    //             },
+
+    //             siblings: gallery.siblings.map((s) => ({
+    //                 slot: s.slot,
+    //                 url: buildImageUrl(s.publicId, 600, 600),
+    //             })),
+    //         }));
+
+
+    //         return res.status(200).json({
+    //             success: true,
+    //             page,
+    //             totalPages,
+    //             hasNextPage: page < totalPages, // ✅ ADD THIS
+    //             count: galleries.length,
+    //             // data: galleries,
+    //             data: formattedData,
+    //         });
+
+    //     } catch (error) {
+    //         console.error("GET ALL GALLERY ERROR:", error);
+    //         return res.status(500).json({
+    //             success: false,
+    //             message: error.message,
+    //         });
+    //     }
+    // },
+
     uploadGalleryImages: async (req, res) => {
-        const tempPaths = [];
-        // const files = req.files || [];
         try {
             const files = req.files;
-            console.log('-------->', files)
-            if (!files?.primary) {
+
+            if (!files?.primary?.[0]) {
                 return res.status(400).json({
                     success: false,
                     message: "Primary image is required",
                 });
             }
-
-            /* ======= REGISTER ALL TEMP FILES FIRST ======= */
-            for (const key of Object.keys(files)) {
-                const file = files[key]?.[0];
-                if (file?.path) {
-                    tempPaths.push(file.path);
-                }
-            }
-            /* ========= PRIMARY ========= */
+            /* PRIMARY */
             const primaryFile = files.primary[0];
-            // tempPaths.push(primaryFile.path);
-
-            const primaryUpload = await uploadToCloudinary(
-                primaryFile.path, "gallery"
-            );
 
             const primaryImage = {
-                // url: primaryUpload.secure_url,
-                publicId: primaryUpload.public_id,
+                url: `/uploads/${primaryFile.filename}`,
+                publicId: primaryFile.filename,
             };
-
-            /* ========= SIBLINGS ========= */
-            // const siblings = [];
-
-            // for (const key of Object.keys(files)) {
-            //     if (!key.startsWith("sibling")) continue;
-
-            //     const file = files[key][0];
-            //     tempPaths.push(file.path); // 👈 save temp path
-
-            //     const upload = await uploadToCloudinary(file.path, "gallery");
-            //     siblings.push({
-            //         url: upload.secure_url,
-            //         publicId: upload.public_id,
-            //     });
-            // }
-            /* ========= SIBLINGS ========= */
+            /* SIBLINGS */
             const siblings = [];
-
             for (const key of Object.keys(files)) {
                 if (!key.startsWith("sibling")) continue;
 
                 const file = files[key][0];
-                // tempPaths.push(file.path);
-
-                const upload = await uploadToCloudinary(file.path, "gallery");
 
                 siblings.push({
-                    slot: key, // ✅ VERY IMPORTANT
-                    // url: upload.secure_url,
-                    publicId: upload.public_id,
+                    slot: key,
+                    url: `/uploads/${file.filename}`,
+                    publicId: file.filename,
                 });
             }
-
-
             const gallery = await NewGallery.create({
                 primaryImage,
                 siblings,
@@ -83,102 +271,15 @@ module.exports = {
             res.status(201).json({
                 success: true,
                 data: gallery,
-            })
-
-            // const images = [];
-            // for (const slot of SLOTS) {
-            //     if (req.files?.[slot]?.[0]) {
-            //         const file = req.files[slot][0];
-            //         tempPaths.push(file.path); // 👈 save temp path
-
-            //         const upload = await uploadToCloudinary(file.path, "branches");
-
-            //         images.push({
-            //             url: upload.secure_url,
-            //             publicId: upload.public_id,
-            //         });
-            //     }
-            // }
-
-
-            // const files = req.files;
-            // if (!files || files.length === 0) {
-            //     return res.status(400).json({
-            //         success: false,
-            //         message: "At least one image is required",
-            //     });
-            // }
-
-            // const uploads = [];
-
-            // for (const file of files) {
-            //     tempPaths.push(file.path); // 👈 track temp files
-            //     const upload = await uploadToCloudinary(
-            //         file.path,
-            //         "newGallery"
-            //     );
-
-
-            //     uploads.push({
-            //         url: upload.secure_url,
-            //         publicId: upload.public_id,
-            //     });
-            // }
-
-            // const gallery = await NewGallery.create({
-            //     primaryImage: uploads[0],
-            //     siblings: uploads.slice(1),
-            // });
-            // const gallery = await NewGallery.create({
-            //     images
-            // });
-
-            // return res.status(201).json({
-            //     success: true,
-            //     message: "Gallery slot created successfully",
-            //     data: gallery,
-            // });
-
+            });
         } catch (error) {
             console.error("GALLERY ERROR:", error);
-            return res.status(500).json({
+            res.status(500).json({
                 success: false,
                 message: error.message,
             });
-        } finally {
-            // 🧹 ALWAYS cleanup temp files (ASYNC + SAFE)
-            // for (const filePath of tempPaths) {
-            //     try {
-            //         await fsPromises.unlink(filePath);
-            //         console.log("🧹 Temp file deleted:", filePath);
-            //     } catch (err) {
-            //         console.error(
-            //             "❌ Failed to delete temp file:",
-            //             filePath,
-            //             err.message
-            //         );
-            //     }
-            // }
-            /* ========= CLEANUP ========= */
-            await Promise.all(
-                tempPaths.map(async (filePath) => {
-                    try {
-                        await fsPromises.unlink(filePath);
-                        console.log("🧹 Temp file deleted:", filePath);
-                    } catch (err) {
-                        if (err.code !== "ENOENT") {
-                            console.error(
-                                "❌ Failed to delete temp file:",
-                                filePath,
-                                err.message
-                            );
-                        }
-                    }
-                })
-            );
         }
     },
-
     getAllGalleries: async (req, res) => {
         try {
             const page = parseInt(req.query.page) || 1;
@@ -193,147 +294,193 @@ module.exports = {
             const total = await NewGallery.countDocuments();
             const totalPages = Math.ceil(total / limit);
 
-            // NEW CODE FOR IMAGE OPTIMIZATION GET
-            const formattedData = galleries.map((gallery) => ({
-                _id: gallery._id,
-                createdAt: gallery.createdAt,
-
-                primaryImage: {
-                    url: buildImageUrl(
-                        gallery.primaryImage.publicId,
-                        1200,
-                        800
-                    ),
-                },
-
-                siblings: gallery.siblings.map((s) => ({
-                    slot: s.slot,
-                    url: buildImageUrl(s.publicId, 600, 600),
-                })),
-            }));
-
-
-            return res.status(200).json({
+            res.status(200).json({
                 success: true,
                 page,
                 totalPages,
-                hasNextPage: page < totalPages, // ✅ ADD THIS
+                hasNextPage: page < totalPages,
                 count: galleries.length,
-                // data: galleries,
-                data: formattedData,
+                data: galleries,
             });
-
         } catch (error) {
-            console.error("GET ALL GALLERY ERROR:", error);
-            return res.status(500).json({
+            res.status(500).json({
                 success: false,
                 message: error.message,
             });
         }
     },
+
     getAllGalleriesAdmin: async (req, res) => {
         try {
-            const galleries = await NewGallery.find()
-                .sort({ createdAt: -1 }); // latest first
-
-            // NEW CODE FOR IMAGE OPTIMIZATION GET
-            const formattedData = galleries.map((gallery) => ({
-                _id: gallery._id,
-                createdAt: gallery.createdAt,
-
-                primaryImage: {
-                    publicId: gallery.primaryImage.publicId,
-                    url: buildImageUrl(
-                        gallery.primaryImage.publicId,
-                        300,
-                        200
-                    ),
-                },
-
-                siblings: gallery.siblings.map((s) => ({
-                    slot: s.slot,
-                    publicId: s.publicId,
-                    url: buildImageUrl(s.publicId, 200, 200),
-                })),
-            }));
-
-
-            return res.status(200).json({
+            const galleries = await NewGallery.find().sort({ createdAt: -1 });
+            res.status(200).json({
                 success: true,
                 count: galleries.length,
-                // data: galleries,
-                data: formattedData,
+                data: galleries,
             });
-
         } catch (error) {
-            console.error("ADMIN GET ALL GALLERY ERROR:", error);
-            return res.status(500).json({
+            res.status(500).json({
                 success: false,
                 message: error.message,
             });
         }
     },
+    // getAllGalleriesAdmin: async (req, res) => {
+    //     try {
+    //         const galleries = await NewGallery.find()
+    //             .sort({ createdAt: -1 }); // latest first
+
+    //         // NEW CODE FOR IMAGE OPTIMIZATION GET
+    //         const formattedData = galleries.map((gallery) => ({
+    //             _id: gallery._id,
+    //             createdAt: gallery.createdAt,
+
+    //             primaryImage: {
+    //                 publicId: gallery.primaryImage.publicId,
+    //                 url: buildImageUrl(
+    //                     gallery.primaryImage.publicId,
+    //                     300,
+    //                     200
+    //                 ),
+    //             },
+
+    //             siblings: gallery.siblings.map((s) => ({
+    //                 slot: s.slot,
+    //                 publicId: s.publicId,
+    //                 url: buildImageUrl(s.publicId, 200, 200),
+    //             })),
+    //         }));
+
+
+    //         return res.status(200).json({
+    //             success: true,
+    //             count: galleries.length,
+    //             // data: galleries,
+    //             data: formattedData,
+    //         });
+
+    //     } catch (error) {
+    //         console.error("ADMIN GET ALL GALLERY ERROR:", error);
+    //         return res.status(500).json({
+    //             success: false,
+    //             message: error.message,
+    //         });
+    //     }
+    // },
 
     deleteGalleryById: async (req, res) => {
         try {
             const { id } = req.params;
-
             const gallery = await NewGallery.findById(id);
-
             if (!gallery) {
                 return res.status(404).json({
                     success: false,
                     message: "Gallery not found",
                 });
             }
-
-            // 1️⃣ Delete primary image from Cloudinary
+            // Delete primary
             if (gallery.primaryImage?.publicId) {
-                await cloudinary.uploader.destroy(
-                    gallery.primaryImage.publicId, { resource_type: "image", invalidate: true }
+                const primaryPath = path.join(
+                    process.cwd(),
+                    "uploads",
+                    "media",
+                    gallery.primaryImage.publicId
                 );
-            }
 
-            // 2️⃣ Delete sibling images from Cloudinary
-            // if (gallery.siblings?.length > 0) {
-            //     for (const img of gallery.siblings) {
-            //         if (img.publicId) {
-            //             await cloudinary.uploader.destroy(img.publicId);
-            //         }
-            //     }
-            // }
-            if (Array.isArray(gallery.siblings) && gallery.siblings.length > 0) {
+                try {
+                    await fsPromises.unlink(primaryPath);
+                } catch { }
+            }
+            // Delete siblings
+            if (Array.isArray(gallery.siblings)) {
                 for (const img of gallery.siblings) {
                     if (img.publicId) {
-                        await cloudinary.uploader.destroy(
-                            img.publicId,
-                            { resource_type: "image", invalidate: true }
+                        const filePath = path.join(
+                            process.cwd(),
+                            "uploads",
+                            "media",
+                            img.publicId
                         );
+
+                        try {
+                            await fsPromises.unlink(filePath);
+                        } catch { }
                     }
                 }
             }
-
-            // 3️⃣ Delete gallery document from DB
             await NewGallery.findByIdAndDelete(id);
-
-            return res.status(200).json({
+            res.status(200).json({
                 success: true,
-                message: "Gallery (primary + all siblings) deleted successfully",
+                message: "Gallery deleted successfully",
             });
+
+
         } catch (error) {
-            console.error("DELETE GALLERY ERROR:", error);
-            return res.status(500).json({
+            res.status(500).json({
                 success: false,
                 message: error.message,
             });
         }
     },
+    // deleteGalleryById: async (req, res) => {
+    //     try {
+    //         const { id } = req.params;
+
+    //         const gallery = await NewGallery.findById(id);
+
+    //         if (!gallery) {
+    //             return res.status(404).json({
+    //                 success: false,
+    //                 message: "Gallery not found",
+    //             });
+    //         }
+
+    //         // 1️⃣ Delete primary image from Cloudinary
+    //         if (gallery.primaryImage?.publicId) {
+    //             await cloudinary.uploader.destroy(
+    //                 gallery.primaryImage.publicId, { resource_type: "image", invalidate: true }
+    //             );
+    //         }
+
+    //         // 2️⃣ Delete sibling images from Cloudinary
+    //         // if (gallery.siblings?.length > 0) {
+    //         //     for (const img of gallery.siblings) {
+    //         //         if (img.publicId) {
+    //         //             await cloudinary.uploader.destroy(img.publicId);
+    //         //         }
+    //         //     }
+    //         // }
+    //         if (Array.isArray(gallery.siblings) && gallery.siblings.length > 0) {
+    //             for (const img of gallery.siblings) {
+    //                 if (img.publicId) {
+    //                     await cloudinary.uploader.destroy(
+    //                         img.publicId,
+    //                         { resource_type: "image", invalidate: true }
+    //                     );
+    //                 }
+    //             }
+    //         }
+
+    //         // 3️⃣ Delete gallery document from DB
+    //         await NewGallery.findByIdAndDelete(id);
+
+    //         return res.status(200).json({
+    //             success: true,
+    //             message: "Gallery (primary + all siblings) deleted successfully",
+    //         });
+    //     } catch (error) {
+    //         console.error("DELETE GALLERY ERROR:", error);
+    //         return res.status(500).json({
+    //             success: false,
+    //             message: error.message,
+    //         });
+    //     }
+    // },
+
     editGalleryImages: async (req, res) => {
-        const tempPaths = [];
         try {
             const { id } = req.params;
             const files = req.files || {};
-
             const gallery = await NewGallery.findById(id);
             if (!gallery) {
                 return res.status(404).json({
@@ -341,88 +488,174 @@ module.exports = {
                     message: "Gallery not found",
                 });
             }
-            /* ========= UPDATE PRIMARY (OPTIONAL) ========= */
+            /* UPDATE PRIMARY */
             if (files.primary?.[0]) {
                 const file = files.primary[0];
-                tempPaths.push(file.path);
 
-                // delete old primary
+                // delete old
                 if (gallery.primaryImage?.publicId) {
-                    await cloudinary.uploader.destroy(
-                        gallery.primaryImage.publicId,
-                        { resource_type: "image" } // ✅ FIX
+                    const oldPath = path.join(
+                        process.cwd(),
+                        "uploads",
+                        "media",
+                        gallery.primaryImage.publicId
                     );
+
+                    try {
+                        await fsPromises.unlink(oldPath);
+                    } catch { }
                 }
 
-                const upload = await uploadToCloudinary(file.path, "gallery");
-
                 gallery.primaryImage = {
-                    // url: upload.secure_url,
-                    publicId: upload.public_id,
+                    url: `/uploads/${file.filename}`,
+                    publicId: file.filename,
                 };
             }
-            /* ========= UPDATE ONLY SELECTED SIBLINGS ========= */
+            /* UPDATE SIBLINGS */
             for (const key of Object.keys(files)) {
                 if (!key.startsWith("sibling")) continue;
 
                 const file = files[key][0];
-                tempPaths.push(file.path);
 
-                const upload = await uploadToCloudinary(file.path, "gallery");
-
-                // find sibling by slot
                 const index = gallery.siblings.findIndex(
                     (img) => img.slot === key
                 );
 
-                // delete only this slot from cloudinary
+                // delete old slot image
                 if (index !== -1) {
-                    await cloudinary.uploader.destroy(
-                        gallery.siblings[index].publicId, { resource_type: "image" } // ✅ FIX
+                    const oldPath = path.join(
+                        process.cwd(),
+                        "uploads",
+                        "media",
+                        gallery.siblings[index].publicId
                     );
 
-                    // replace only this slot
+                    try {
+                        await fsPromises.unlink(oldPath);
+                    } catch { }
+
                     gallery.siblings[index] = {
                         slot: key,
-                        // url: upload.secure_url,
-                        publicId: upload.public_id,
+                        url: `/uploads/${file.filename}`,
+                        publicId: file.filename,
                     };
                 } else {
-                    // add new slot if not present
                     gallery.siblings.push({
                         slot: key,
-                        // url: upload.secure_url,
-                        publicId: upload.public_id,
+                        url: `/uploads/${file.filename}`,
+                        publicId: file.filename,
                     });
                 }
             }
             await gallery.save();
 
-            return res.status(200).json({
+            res.status(200).json({
                 success: true,
                 message: "Gallery updated successfully",
                 data: gallery,
             });
         } catch (error) {
-            console.error("EDIT GALLERY ERROR:", error);
-            return res.status(500).json({
+            res.status(500).json({
                 success: false,
                 message: error.message,
             });
-        } finally {
-            // 🧹 ALWAYS cleanup temp files (ASYNC + SAFE)
-            for (const filePath of tempPaths) {
-                try {
-                    await fsPromises.unlink(filePath);
-                    console.log("🧹 Temp file deleted:", filePath);
-                } catch (err) {
-                    console.error(
-                        "❌ Failed to delete temp file:",
-                        filePath,
-                        err.message
-                    );
-                }
-            }
         }
-    }
+    },
+    // editGalleryImages: async (req, res) => {
+    //     const tempPaths = [];
+    //     try {
+    //         const { id } = req.params;
+    //         const files = req.files || {};
+
+    //         const gallery = await NewGallery.findById(id);
+    //         if (!gallery) {
+    //             return res.status(404).json({
+    //                 success: false,
+    //                 message: "Gallery not found",
+    //             });
+    //         }
+    //         /* ========= UPDATE PRIMARY (OPTIONAL) ========= */
+    //         if (files.primary?.[0]) {
+    //             const file = files.primary[0];
+    //             tempPaths.push(file.path);
+
+    //             // delete old primary
+    //             if (gallery.primaryImage?.publicId) {
+    //                 await cloudinary.uploader.destroy(
+    //                     gallery.primaryImage.publicId,
+    //                     { resource_type: "image" } // ✅ FIX
+    //                 );
+    //             }
+
+    //             const upload = await uploadToCloudinary(file.path, "gallery");
+
+    //             gallery.primaryImage = {
+    //                 // url: upload.secure_url,
+    //                 publicId: upload.public_id,
+    //             };
+    //         }
+    //         /* ========= UPDATE ONLY SELECTED SIBLINGS ========= */
+    //         for (const key of Object.keys(files)) {
+    //             if (!key.startsWith("sibling")) continue;
+
+    //             const file = files[key][0];
+    //             tempPaths.push(file.path);
+
+    //             const upload = await uploadToCloudinary(file.path, "gallery");
+
+    //             // find sibling by slot
+    //             const index = gallery.siblings.findIndex(
+    //                 (img) => img.slot === key
+    //             );
+
+    //             // delete only this slot from cloudinary
+    //             if (index !== -1) {
+    //                 await cloudinary.uploader.destroy(
+    //                     gallery.siblings[index].publicId, { resource_type: "image" } // ✅ FIX
+    //                 );
+
+    //                 // replace only this slot
+    //                 gallery.siblings[index] = {
+    //                     slot: key,
+    //                     // url: upload.secure_url,
+    //                     publicId: upload.public_id,
+    //                 };
+    //             } else {
+    //                 // add new slot if not present
+    //                 gallery.siblings.push({
+    //                     slot: key,
+    //                     // url: upload.secure_url,
+    //                     publicId: upload.public_id,
+    //                 });
+    //             }
+    //         }
+    //         await gallery.save();
+
+    //         return res.status(200).json({
+    //             success: true,
+    //             message: "Gallery updated successfully",
+    //             data: gallery,
+    //         });
+    //     } catch (error) {
+    //         console.error("EDIT GALLERY ERROR:", error);
+    //         return res.status(500).json({
+    //             success: false,
+    //             message: error.message,
+    //         });
+    //     } finally {
+    //         // 🧹 ALWAYS cleanup temp files (ASYNC + SAFE)
+    //         for (const filePath of tempPaths) {
+    //             try {
+    //                 await fsPromises.unlink(filePath);
+    //                 console.log("🧹 Temp file deleted:", filePath);
+    //             } catch (err) {
+    //                 console.error(
+    //                     "❌ Failed to delete temp file:",
+    //                     filePath,
+    //                     err.message
+    //                 );
+    //             }
+    //         }
+    //     }
+    // }
 };

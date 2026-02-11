@@ -383,29 +383,219 @@
 const Branch = require("../models/branchDetailModel");
 const cloudinary = require("../../config/cloudinary");
 const uploadToCloudinary = require("../../utils/branchCloudinary");
-// const fs = require("fs");
+
 const fsPromises = require("fs/promises");
+const path = require("path");
 
 // SLOT ORDER (VERY IMPORTANT)
 const SLOTS = ["primary", "secondary1", "secondary2"];
 
 /* ================= CREATE ================= */
+// exports.createBranch = async (req, res) => {
+//     const tempPaths = []; // 👈 track all temp files
+//     try {
+//         const { branchName, address, contact, embedUrl } = req.body;
+//         const images = [];
+
+//         for (const slot of SLOTS) {
+//             if (req.files?.[slot]?.[0]) {
+//                 const file = req.files[slot][0];
+//                 tempPaths.push(file.path); // 👈 save temp path
+
+//                 const upload = await uploadToCloudinary(file.path, "branches");
+
+//                 images.push({
+//                     url: upload.secure_url,
+//                     publicId: upload.public_id,
+//                 });
+//             }
+//         }
+
+//         const branch = await Branch.create({
+//             branchName,
+//             address,
+//             contact,
+//             embedUrl,
+//             images,
+//         });
+
+//         res.status(201).json({
+//             success: true,
+//             message: "Branch created successfully",
+//             branch,
+//         });
+
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).json({ message: "Create failed" });
+//     } finally {
+//         // 🧹 ALWAYS cleanup temp files (NON-BLOCKING, SAFE)
+//         for (const filePath of tempPaths) {
+//             try {
+//                 await fsPromises.unlink(filePath);
+//                 console.log("🧹 Temp file deleted:", filePath);
+//             } catch (err) {
+//                 console.error("❌ Failed to delete temp file:", filePath, err.message);
+//             }
+//         }
+//     }
+// };
+
+/* ================= EDIT ================= */
+// exports.editBranchById = async (req, res) => {
+//     const tempPaths = []; // 👈 track temp files
+//     try {
+//         const { id } = req.params;
+//         // console.log(res.files)
+//         const branch = await Branch.findById(id);
+//         if (!branch) {
+//             return res.status(404).json({ message: "Branch not found" });
+//         }
+
+//         // Update text fields
+//         branch.branchName = req.body.branchName;
+//         branch.address = req.body.address;
+//         branch.contact = req.body.contact;
+//         branch.embedUrl = req.body.embedUrl;
+
+
+
+//         // Replace only uploaded slots
+//         // for (let i = 0; i < SLOTS.length; i++) {
+//         //     const slot = SLOTS[i];
+
+
+//         //     if (req.files?.[slot]?.[0]) {
+//         //         console.log('there file --> ', req.files?.[slot]?.[0])
+//         //         const file = req.files[slot][0];
+//         //         // delete old image (only this slot)
+//         //         if (branch.images[i]?.publicId) {
+//         //             // console.log('branch --> ', branch)
+//         //             await cloudinary.uploader.destroy(branch.images[i].publicId);
+//         //         }
+
+//         //         const upload = await uploadToCloudinary(file.path, "branches");
+
+//         //         branch.images[i] = {
+//         //             url: upload.secure_url,
+//         //             publicId: upload.public_id,
+//         //         };
+//         //     }
+//         // }
+
+//         // new code for fast api's optimization
+//         const tasks = [];
+
+//         for (let i = 0; i < SLOTS.length; i++) {
+//             const slot = SLOTS[i];
+
+//             if (req.files?.[slot]?.[0]) {
+//                 const file = req.files[slot][0];
+//                 const oldPublicId = branch.images[i]?.publicId;
+
+//                 tempPaths.push(file.path); // ✅ track temp file
+
+//                 tasks.push(
+//                     (async () => {
+//                         const [, upload] = await Promise.all([
+//                             oldPublicId
+//                                 ? cloudinary.uploader.destroy(oldPublicId, { resource_type: "image" })
+//                                 : Promise.resolve(),
+
+//                             uploadToCloudinary(file.path, "branches"),
+//                         ]);
+
+//                         branch.images[i] = {
+//                             url: upload.secure_url,
+//                             publicId: upload.public_id,
+//                         };
+//                     })()
+//                 );
+//             }
+//         }
+
+//         await Promise.all(tasks);
+//         await branch.save();
+
+//         res.status(200).json({
+//             success: true,
+//             message: "Branch updated successfully",
+//             branch,
+//         });
+
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).json({ message: "Edit failed" });
+//     } finally {
+//         // 🧹 ALWAYS cleanup temp files
+//         for (const filePath of tempPaths) {
+//             try {
+//                 await fsPromises.unlink(filePath);
+//                 console.log("🧹 Temp file deleted:", filePath);
+//             } catch (err) {
+//                 console.error("❌ Failed to delete temp file:", filePath, err.message);
+//             }
+//         }
+//     }
+// };
+
+/* ================= GET ALL ================= */
+// exports.getBranches = async (req, res) => {
+//     try {
+//         const branches = await Branch.find().sort({ createdAt: 1 });
+//         res.status(200).json({ success: true, data: branches });
+//     } catch (err) {
+//         res.status(500).json({ message: "Fetch failed" });
+//     }
+// };
+
+/* ================= DELETE ================= */
+// exports.deleteBranchById = async (req, res) => {
+//     try {
+//         const { id } = req.params;
+
+//         const branch = await Branch.findById(id);
+//         if (!branch) {
+//             return res.status(404).json({ message: "Branch not found" });
+//         }
+
+//         // delete images
+//         if (branch.images?.length) {
+//             await Promise.all(
+//                 branch.images.map(img =>
+//                     cloudinary.uploader.destroy(img.publicId)
+//                 )
+//             );
+//         }
+
+//         await Branch.findByIdAndDelete(id);
+
+//         res.status(200).json({
+//             success: true,
+//             message: "Branch deleted successfully",
+//         });
+
+//     } catch (err) {
+//         res.status(500).json({ message: "Delete failed" });
+//     }
+// };
+
+
+// REFACTOR CODE UPLOAD ALL MEDIA IN SERVER
+
 exports.createBranch = async (req, res) => {
-    const tempPaths = []; // 👈 track all temp files
     try {
         const { branchName, address, contact, embedUrl } = req.body;
+
         const images = [];
 
         for (const slot of SLOTS) {
             if (req.files?.[slot]?.[0]) {
                 const file = req.files[slot][0];
-                tempPaths.push(file.path); // 👈 save temp path
-
-                const upload = await uploadToCloudinary(file.path, "branches");
 
                 images.push({
-                    url: upload.secure_url,
-                    publicId: upload.public_id,
+                    url: `/uploads/${file.filename}`,
+                    publicId: file.filename, // used for delete
                 });
             }
         }
@@ -424,29 +614,17 @@ exports.createBranch = async (req, res) => {
             branch,
         });
 
-    } catch (err) {
+    } catch (error) {
         console.error(err);
         res.status(500).json({ message: "Create failed" });
-    } finally {
-        // 🧹 ALWAYS cleanup temp files (NON-BLOCKING, SAFE)
-        for (const filePath of tempPaths) {
-            try {
-                await fsPromises.unlink(filePath);
-                console.log("🧹 Temp file deleted:", filePath);
-            } catch (err) {
-                console.error("❌ Failed to delete temp file:", filePath, err.message);
-            }
-        }
     }
 };
 
-/* ================= EDIT ================= */
 exports.editBranchById = async (req, res) => {
-    const tempPaths = []; // 👈 track temp files
     try {
         const { id } = req.params;
-        // console.log(res.files)
         const branch = await Branch.findById(id);
+
         if (!branch) {
             return res.status(404).json({ message: "Branch not found" });
         }
@@ -457,63 +635,37 @@ exports.editBranchById = async (req, res) => {
         branch.contact = req.body.contact;
         branch.embedUrl = req.body.embedUrl;
 
-
-
         // Replace only uploaded slots
-        // for (let i = 0; i < SLOTS.length; i++) {
-        //     const slot = SLOTS[i];
-
-
-        //     if (req.files?.[slot]?.[0]) {
-        //         console.log('there file --> ', req.files?.[slot]?.[0])
-        //         const file = req.files[slot][0];
-        //         // delete old image (only this slot)
-        //         if (branch.images[i]?.publicId) {
-        //             // console.log('branch --> ', branch)
-        //             await cloudinary.uploader.destroy(branch.images[i].publicId);
-        //         }
-
-        //         const upload = await uploadToCloudinary(file.path, "branches");
-
-        //         branch.images[i] = {
-        //             url: upload.secure_url,
-        //             publicId: upload.public_id,
-        //         };
-        //     }
-        // }
-
-        // new code for fast api's optimization
-        const tasks = [];
-
         for (let i = 0; i < SLOTS.length; i++) {
             const slot = SLOTS[i];
 
             if (req.files?.[slot]?.[0]) {
                 const file = req.files[slot][0];
-                const oldPublicId = branch.images[i]?.publicId;
 
-                tempPaths.push(file.path); // ✅ track temp file
+                // 🗑 Delete old file (if exists)
+                if (branch.images[i]?.publicId) {
+                    const oldPath = path.join(
+                        process.cwd(),
+                        "uploads",
+                        "media",
+                        branch.images[i].publicId
+                    );
 
-                tasks.push(
-                    (async () => {
-                        const [, upload] = await Promise.all([
-                            oldPublicId
-                                ? cloudinary.uploader.destroy(oldPublicId, { resource_type: "image" })
-                                : Promise.resolve(),
+                    try {
+                        await fsPromises.unlink(oldPath);
+                    } catch (err) {
+                        console.warn("Old file missing:", err.message);
+                    }
+                }
 
-                            uploadToCloudinary(file.path, "branches"),
-                        ]);
-
-                        branch.images[i] = {
-                            url: upload.secure_url,
-                            publicId: upload.public_id,
-                        };
-                    })()
-                );
+                // Replace with new file
+                branch.images[i] = {
+                    url: `/uploads/${file.filename}`,
+                    publicId: file.filename,
+                };
             }
         }
 
-        await Promise.all(tasks);
         await branch.save();
 
         res.status(200).json({
@@ -522,49 +674,51 @@ exports.editBranchById = async (req, res) => {
             branch,
         });
 
-    } catch (err) {
+    } catch (error) {
         console.error(err);
         res.status(500).json({ message: "Edit failed" });
-    } finally {
-        // 🧹 ALWAYS cleanup temp files
-        for (const filePath of tempPaths) {
-            try {
-                await fsPromises.unlink(filePath);
-                console.log("🧹 Temp file deleted:", filePath);
-            } catch (err) {
-                console.error("❌ Failed to delete temp file:", filePath, err.message);
-            }
-        }
     }
 };
-
-/* ================= GET ALL ================= */
 exports.getBranches = async (req, res) => {
     try {
         const branches = await Branch.find().sort({ createdAt: 1 });
-        res.status(200).json({ success: true, data: branches });
-    } catch (err) {
+
+        res.status(200).json({
+            success: true,
+            data: branches,
+        });
+
+    } catch (error) {
+        console.error(err);
         res.status(500).json({ message: "Fetch failed" });
     }
 };
-
-/* ================= DELETE ================= */
 exports.deleteBranchById = async (req, res) => {
     try {
         const { id } = req.params;
-
         const branch = await Branch.findById(id);
         if (!branch) {
             return res.status(404).json({ message: "Branch not found" });
         }
 
-        // delete images
+        // 🗑 Delete all images from server
         if (branch.images?.length) {
-            await Promise.all(
-                branch.images.map(img =>
-                    cloudinary.uploader.destroy(img.publicId)
-                )
-            );
+            for (const img of branch.images) {
+                if (img.publicId) {
+                    const filePath = path.join(
+                        process.cwd(),
+                        "uploads",
+                        "media",
+                        img.publicId
+                    );
+
+                    try {
+                        await fsPromises.unlink(filePath);
+                    } catch (err) {
+                        console.warn("File already missing:", err.message);
+                    }
+                }
+            }
         }
 
         await Branch.findByIdAndDelete(id);
@@ -573,8 +727,8 @@ exports.deleteBranchById = async (req, res) => {
             success: true,
             message: "Branch deleted successfully",
         });
-
-    } catch (err) {
+    } catch (error) {
+        console.error(err);
         res.status(500).json({ message: "Delete failed" });
     }
 };

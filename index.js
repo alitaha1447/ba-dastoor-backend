@@ -25,7 +25,8 @@ const app = express()
 const port = process.env.PORT
 
 // 👇 ADD THIS
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static(path.join(__dirname, "uploads/media")));
 
 
 /* -------------------- DATABASE -------------------- */

@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const upload = require('../../middleware/upload')
 
-const { uploadDesktopBanner, getDesktopBannerByPage, deleteDesktopBannerById, updateDesktopBannerSelection, getSelectedDesktopBanners } = require('../desktopBanner/desktopControllers');
+const { uploadDesktopBanner, getDesktopBannerByPage, deleteDesktopBannerById, updateDesktopBannerSelection } = require('../desktopBanner/desktopControllers');
 
 router.post('/upload-desktopBanner',
     upload.fields([
@@ -12,6 +12,6 @@ router.post('/upload-desktopBanner',
 router.get('/get-desktopBanner', getDesktopBannerByPage);
 router.delete('/delete-desktopBanner/:id', deleteDesktopBannerById);
 router.patch('/patch-desktopBanner', updateDesktopBannerSelection);
-router.get('/get-selected-desktopBanner', getSelectedDesktopBanners);
+// router.get('/get-selected-desktopBanner', getSelectedDesktopBanners);
 
 module.exports = router;

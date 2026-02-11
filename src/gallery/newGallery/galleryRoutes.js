@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const upload = require('../../middleware/newUpload')
+const upload = require('../../middleware/upload')
 
 const { uploadGalleryImages, getAllGalleries, getAllGalleriesAdmin, deleteGalleryById, editGalleryImages } = require('../newGallery/galleryControllers')
 

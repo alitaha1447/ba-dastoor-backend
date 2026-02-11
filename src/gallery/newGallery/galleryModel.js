@@ -30,7 +30,7 @@ const mongoose = require("mongoose");
 const gallerySchema = new mongoose.Schema(
     {
         primaryImage: {
-            // url: { type: String, required: true },
+            url: { type: String, required: true },
             publicId: { type: String, required: true },
         },
 
@@ -42,7 +42,7 @@ const gallerySchema = new mongoose.Schema(
                         enum: ["sibling1", "sibling2", "sibling3", "sibling4", "sibling5"],
                         required: true,
                     },
-                    // url: { type: String, required: true },
+                    url: { type: String, required: true },
                     publicId: { type: String, required: true },
                 },
             ],
