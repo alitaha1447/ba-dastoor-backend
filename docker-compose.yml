@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  ba-dastoor-backend:
+    build: .
+    ports:
+      - "7000:7000"
+    volumes:
+      # Persist uploads/media outside the container
+      # Host Path : Container Path
+      - ./uploads/media:/app/uploads/media
+    env_file:
+      - .env
+    restart: always
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./uploads/media:/usr/share/nginx/html/uploads/media
+    depends_on:
+      - ba-dastoor-backend
+    restart: always
