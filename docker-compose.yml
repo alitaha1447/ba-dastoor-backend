@@ -1,25 +1,42 @@
 version: '3.8'
 
 services:
-  ba-dastoor-backend:
-    build: .
+  ba-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ba-backend
     ports:
       - "7000:7000"
     volumes:
-      # Persist uploads/media outside the container
-      # Host Path : Container Path
-      - ./uploads/media:/app/uploads/media
+      # This will create an 'uploads' folder inside your backend directory on the VPS
+      - ./uploads:/usr/src/app/uploads
     env_file:
       - .env
+    environment:
+      - NODE_ENV=production
+      - PORT=7000
+      - DB_URL=mongodb://admin:mySecurePassword123@72.62.226.151:27017/ba-dastoor?authSource=admin
     restart: always
 
-  nginx:
-    image: nginx:latest
+  ba-webpage:
+    build:
+      context: ../ba-dastoor
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE_URL=https://ba-dastoor.com
+    container_name: ba-webpage
     ports:
-      - "80:80"
-    volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
-      - ./uploads/media:/usr/share/nginx/html/uploads/media
-    depends_on:
-      - ba-dastoor-backend
+      - "4000:80"
+    restart: always
+
+  ba-admin:
+    build:
+      context: ../ba-dastoor-admin-panel
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE_URL=https://ba-dastoor.com
+    container_name: ba-admin
+    ports:
+      - "4001:80"
     restart: always
