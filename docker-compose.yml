@@ -17,6 +17,10 @@ services:
       - NODE_ENV=production
       - PORT=7000
       - DB_URL=mongodb://admin:mySecurePassword123@72.62.226.151:27017/ba-dastoor?authSource=admin
+      - SMTP_HOST=smtpout.secureserver.net
+      - SMTP_PORT=465
+      - SMTP_USER=admin@ba-dastoor.com
+      - SMTP_PASS=Azeem@123456
     restart: always
 
   ba-webpage:
