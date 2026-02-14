@@ -195,5 +195,38 @@ Our team has received your message and will get back to you shortly with the req
         } catch (error) {
             res.status(500).json({ message: error.message });
         }
-    }
+    },
+    // enquiry counts
+    getEnquiryCounts: async (req, res) => {
+        try {
+            const counts = await Enquiry.aggregate([
+                {
+                    $group: {
+                        _id: "$enquiryType",
+                        count: { $sum: 1 }
+                    }
+                }
+            ]);
+
+            // Convert to structured object
+            const formattedCounts = {
+                all: await Enquiry.countDocuments(),
+                contact: 0,
+                career: 0,
+                franchise: 0
+            };
+
+            counts.forEach(item => {
+                formattedCounts[item._id] = item.count;
+            });
+
+            res.status(200).json({
+                success: true,
+                data: formattedCounts
+            });
+
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    },
 }

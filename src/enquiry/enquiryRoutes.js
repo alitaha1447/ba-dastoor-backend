@@ -1,5 +1,5 @@
 const express = require("express")
-const { createEnquiry, getEnquiries } = require('./enquiryControllers')
+const { createEnquiry, getEnquiries, getEnquiryCounts } = require('./enquiryControllers')
 // const uploadResume = require('../middleware/multerResume')
 // const upload = require('../middleware/multerResume')
 const router = express.Router();
@@ -12,5 +12,7 @@ router.post("/create-enquiry",
 
     createEnquiry);
 router.get("/get-enquiry", getEnquiries);
+router.get("/get-enquiry-count", getEnquiryCounts);
+
 
 module.exports = router
